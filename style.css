@@ -1,0 +1,68 @@
+Body {
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+    background-color: rgb(240, 234, 227);
+}
+
+.lista-Nav {
+    display: flex;
+    /* Alinea los elementos <li> en fila */
+    gap: 0x;
+    /* Define la separación entre los elementos */
+    list-style: none;
+    /* Crucial: quita los puntos (bullets) de la lista */
+    padding: 0;
+    /* Quita el espacio interno por defecto de la lista */
+    margin: 0;
+    /* Quita el espacio externo por defecto de la lista */
+    justify-content: center;
+    /* Opcional: centra el menú en la pantalla */
+}
+
+.lista-Nav a {
+    text-decoration: none;
+    /* Quita el subrayado de los enlaces */
+    color: #333;
+    padding: 4px;
+    border: 1px solid black;
+    margin-right: -1px;
+    transition: box-shadow 0.3s ease;
+}
+
+.lista-Nav a:hover {
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+#formulario-navidad {
+    margin-top: 20px;
+    display: grid;
+    grid-template-columns: auto 250px;
+    gap: 15px 15px;
+    justify-content: center;
+    align-items: center;
+}
+
+#formulario-navidad section {
+    display: contents;
+}
+
+#formulario-navidad label {
+    text-align: left;
+}
+
+#formulario-navidad input {
+    padding: 8px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+#formulario-navidad button {
+    grid-column: 1 / -1;
+    padding: 10px;
+    margin-top: 10px;
+    cursor: pointer;
+}
+
+#Titulo {
+    color: rgb(52, 59, 56);
+    text-align: center;
+}
