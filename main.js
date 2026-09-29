@@ -2,6 +2,9 @@ let titulo = document.getElementById('Titulo');
 titulo.textContent = 'Hola mundo';
 titulo.innerHTML = 'Regalo Secreto <br> Navidad 2026'
 
+
+//-------------------------------------------------------------------------------------------------------------
+
 let formulario = document.getElementById('formulario-navidad');
 let botonFormulario = document.getElementById('boton-formulario');
 formulario.addEventListener('submit', enviarFormulario);
@@ -55,5 +58,59 @@ async function enviarFormulario(e) {
         botonFormulario.disabled = false;
     }
 }
+
+//-------------------------------------------------------------------------------------------------------------
+
+// Agrega un contenedor en tu HTML para mostrar la lista (ej. <div id="lista-regalos"></div>)
+const contenedorRegalos = document.getElementById('cuerpo-tabla-regalos');
+
+async function cargarRegalos() {
+    // Usa exactamente la misma URL que ya tienes para el POST
+    const urlAPI = "https://script.google.com/macros/s/AKfycbwdR7WPevx7l1e_4OJb3OdCbHVhINYRueYq0WRN5gIsc3QaWSiPYyWsjVn_i8zdqMWv/exec";
+
+    try {
+        // Hacemos la petición GET (no necesita configuraciones extra)
+        const respuesta = await fetch(urlAPI);
+
+        // Desempaquetamos el JSON que nos envió Apps Script
+        const datos = await respuesta.json();
+
+        console.log("Datos recibidos:", datos);
+
+        // Llamamos a una función para dibujar los datos en el HTML
+        dibujarLista(datos);
+
+    } catch (error) {
+        console.error("Error al cargar los datos:", error);
+        if (contenedorRegalos) {
+            contenedorRegalos.innerHTML = "<p>Error al cargar la lista.</p>";
+        }
+    }
+}
+
+function dibujarLista(datos) {
+    if (!contenedorRegalos) return;
+
+    // Limpiamos el contenido por si hay un mensaje de "Cargando..."
+    contenedorRegalos.innerHTML = "";
+
+    datos.forEach(item => {
+        // 1. Creamos un elemento <tr> (fila de tabla), NO un <div>
+        const fila = document.createElement('tr');
+
+        // 2. Metemos las 3 columnas (<td>) en esa misma fila
+        fila.innerHTML = `
+            <td>${item.nombre}</td>
+            <td>${item.apellido}</td>
+            <td>${item.regalo}</td>
+        `;
+
+        // 3. Agregamos la fila terminada al cuerpo de la tabla
+        contenedorRegalos.appendChild(fila);
+    });
+}
+
+// Llamamos a la función para que se ejecute apenas cargue la página
+cargarRegalos();
 
 

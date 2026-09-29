@@ -66,3 +66,19 @@ Body {
     color: rgb(52, 59, 56);
     text-align: center;
 }
+
+#tabla-lista-regalos {
+    display: grid;
+    align-items: center;
+    justify-content: center;
+    background-color: aquamarine;
+    border: 1px solid black;
+}
+
+#cuerpo-tabla-regalos {
+    display: grid;
+    align-items: center;
+    justify-content: center;
+    background-color: aquamarine;
+    border: 1px solid black;
+}
