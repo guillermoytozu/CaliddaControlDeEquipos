@@ -49,6 +49,7 @@ async function enviarFormulario(e) {
         // pero si no entró al 'catch', asumimos que el envío se disparó correctamente.
         alert("¡Datos enviados correctamente!");
         formulario.reset();
+        cargarRegalos();
 
     } catch (error) {
         console.error("Error al enviar los datos:", error);
@@ -57,6 +58,7 @@ async function enviarFormulario(e) {
         botonFormulario.textContent = "Enviar";
         botonFormulario.disabled = false;
     }
+
 }
 
 //-------------------------------------------------------------------------------------------------------------
@@ -90,25 +92,49 @@ async function cargarRegalos() {
 
 function dibujarLista(datos) {
     if (!contenedorRegalos) return;
-
-    // Limpiamos el contenido por si hay un mensaje de "Cargando..."
     contenedorRegalos.innerHTML = "";
 
-    datos.forEach(item => {
+    for (let dato of datos) {
         // 1. Creamos un elemento <tr> (fila de tabla), NO un <div>
+
+        console.log(dato);
         const fila = document.createElement('tr');
 
         // 2. Metemos las 3 columnas (<td>) en esa misma fila
         fila.innerHTML = `
-            <td>${item.nombre}</td>
-            <td>${item.apellido}</td>
-            <td>${item.regalo}</td>
+            <td>${dato.nombre}</td>
+            <td>${dato.apellido}</td>
+            <td>${dato.regalo}</td>
         `;
 
         // 3. Agregamos la fila terminada al cuerpo de la tabla
         contenedorRegalos.appendChild(fila);
-    });
+    };
 }
+
+// 1. Capturamos los elementos del menú y las vistas
+const linkInicio = document.getElementById('Link-inicio');
+const linkFotos = document.getElementById('Link-fotos');
+const vistaInicio = document.getElementById('vista-inicio');
+const vistaFotos = document.getElementById('vista-fotos');
+
+// 2. Evento para el botón de "Fotos Navideñas"
+linkFotos.addEventListener('click', (e) => {
+    e.preventDefault(); // Evita que el '#' recargue la página o salte hacia arriba
+
+    // Ocultamos el inicio y mostramos las fotos
+    vistaInicio.classList.add('oculto');
+    vistaFotos.classList.remove('oculto');
+});
+
+// 3. Evento para el botón de "Inicio"
+linkInicio.addEventListener('click', (e) => {
+    e.preventDefault();
+
+    // Ocultamos las fotos y volvemos a mostrar el inicio
+    vistaFotos.classList.add('oculto');
+    vistaInicio.classList.remove('oculto');
+});
 
 // Llamamos a la función para que se ejecute apenas cargue la página
 cargarRegalos();

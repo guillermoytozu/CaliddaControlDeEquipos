@@ -1,35 +1,54 @@
 Body {
     font-family: Verdana, Geneva, Tahoma, sans-serif;
-    background-color: rgb(240, 234, 227);
+    background-color: rgb(250, 246, 240);
+}
+
+#header {
+    width: 100%;
+    padding-top: 15px;
+}
+
+nav {
+    padding: 10px 0;
+    border-bottom: 1px solid #dcd3c9;
 }
 
 .lista-Nav {
     display: flex;
-    /* Alinea los elementos <li> en fila */
-    gap: 0x;
-    /* Define la separación entre los elementos */
-    list-style: none;
-    /* Crucial: quita los puntos (bullets) de la lista */
-    padding: 0;
-    /* Quita el espacio interno por defecto de la lista */
-    margin: 0;
-    /* Quita el espacio externo por defecto de la lista */
     justify-content: center;
-    /* Opcional: centra el menú en la pantalla */
+    gap: 30px;
+    /* Genera un espacio amplio y limpio entre las opciones */
+    list-style: none;
+    padding: 0;
+    margin: 0;
 }
 
 .lista-Nav a {
     text-decoration: none;
-    /* Quita el subrayado de los enlaces */
-    color: #333;
-    padding: 4px;
-    border: 1px solid black;
-    margin-right: -1px;
-    transition: box-shadow 0.3s ease;
+    color: #1d1d1f;
+    /* El gris oscuro característico de las interfaces de Apple */
+    font-size: 0.85rem;
+    /* Texto ligeramente más pequeño y refinado */
+    letter-spacing: 0.5px;
+    /* Un poco de separación entre letras para dar elegancia */
+    padding: 5px 0;
+    /* Solo para ampliar el área donde se puede hacer clic */
+    transition: opacity 0.2s ease;
+    /* Transición suave solo para la transparencia */
 }
 
 .lista-Nav a:hover {
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.15);
+    opacity: 0.6;
+    /* El texto se desvanece sutilmente en lugar de cambiar de color o fondo */
+}
+
+#Titulo {
+    color: rgb(52, 59, 56);
+    text-align: center;
+    margin-top: 40px;
+    /* Crea una separación elegante entre el menú y el título */
+    margin-bottom: 40px;
+
 }
 
 #formulario-navidad {
@@ -62,23 +81,126 @@ Body {
     cursor: pointer;
 }
 
-#Titulo {
-    color: rgb(52, 59, 56);
+
+/* 1. Centramos toda la sección (incluyendo el subtítulo <h2>) */
+#seccion-lista {
     text-align: center;
+    margin-top: 40px;
 }
 
+/* 2. Estilo principal de la tabla */
 #tabla-lista-regalos {
-    display: grid;
-    align-items: center;
-    justify-content: center;
-    background-color: aquamarine;
-    border: 1px solid black;
+    margin: 0 auto;
+    /* Centra la tabla horizontalmente */
+    border-collapse: collapse;
+    /* Une los bordes para que no haya espacios en blanco entre celdas */
+    width: 90%;
+    max-width: 700px;
+    /* Evita que la tabla sea demasiado ancha en pantallas grandes */
+    background-color: white;
+    /* Da un buen contraste contra tu fondo rgb(240, 234, 227) */
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    /* Sombra suave y moderna */
+    border-radius: 8px;
+    /* Bordes redondeados */
+    overflow: hidden;
+    /* Crucial para que el thead respete los bordes redondeados */
 }
 
-#cuerpo-tabla-regalos {
+/* 3. Estilo de los encabezados (Nombre, Apellido, Regalo) */
+#tabla-lista-regalos th {
+    background-color: rgb(52, 59, 56);
+    /* Usamos el mismo color de tu #Titulo para mantener armonía */
+    color: white;
+    padding: 15px;
+    text-align: left;
+    /* Queda mejor que centrado en las tablas */
+    font-weight: bold;
+}
+
+/* 4. Estilo de las celdas normales */
+#tabla-lista-regalos td {
+    padding: 12px 15px;
+    border-bottom: 1px solid #e0e0e0;
+    /* Una línea sutil entre filas en lugar de una cuadrícula pesada */
+    text-align: left;
+}
+
+/* 5. Efecto Cebra: Colorea sutilmente las filas pares para facilitar la lectura */
+#cuerpo-tabla-regalos tr:nth-child(even) {
+    background-color: #f8f9fa;
+}
+
+/* 6. Efecto Hover: Resalta la fila por la que pasas el ratón */
+#cuerpo-tabla-regalos tr:hover {
+    background-color: #f1ece5;
+    /* Un tono ligeramente más oscuro que tu fondo principal */
+    transition: background-color 0.2s ease;
+}
+
+/* 7. Quitamos el borde inferior de la última fila para que quede limpio */
+#cuerpo-tabla-regalos tr:last-child td {
+    border-bottom: none;
+}
+
+/* Esta clase es la clave de todo: oculta el elemento por completo */
+.oculto {
+    display: none !important;
+}
+
+/* Diseño moderno para la galería de fotos */
+.galeria-grid {
     display: grid;
-    align-items: center;
-    justify-content: center;
-    background-color: aquamarine;
-    border: 1px solid black;
+    /* Esto hace que las fotos se acomoden solas en varias columnas */
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    padding: 20px;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.galeria-grid img {
+    width: 100%;
+    height: 250px;
+    object-fit: cover;
+    /* Evita que las fotos se deformen o aplasten */
+    border-radius: 12px;
+    /* Esquinas redondeadas estilo Apple */
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+}
+
+/* Un pequeño efecto al pasar el mouse por las fotos */
+.galeria-grid img:hover {
+    transform: scale(1.03);
+}
+
+footer {
+    margin-top: 50px;
+    /* Le damos un poco más de aire respecto a la tabla */
+    padding-top: 20px;
+    /* Espacio entre la línea superior y el texto */
+    padding-bottom: 20px;
+
+    /* Esta línea reemplaza a tu etiqueta <hr> de forma mucho más limpia */
+    border-top: 1px solid #dcd3c9;
+    /* Un color gris-crema sutil */
+
+    /* Centramos el texto directamente sin necesidad de flexbox */
+    text-align: center;
+
+    /* Jerarquía: hacemos el texto más pequeño y suave */
+    color: #666;
+    font-size: 0.9rem;
+}
+
+footer p {
+    /* Le damos un pequeñísimo respiro de 5px arriba y abajo a cada línea */
+    margin: 5px 0;
+}
+
+.footer-anio {
+    font-weight: bold;
+    /* Reutilizamos el color oscuro de tu #Titulo para mantener la armonía de tu paleta */
+    color: rgb(52, 59, 56);
 }

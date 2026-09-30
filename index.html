@@ -7,51 +7,70 @@
     <link rel="icon" type="image/x-icon" href="/favicon.ico?v=2">
 </head>
 
-<header id="Header">
-    <h1 id="Titulo">Bienvenidos</h1>
-</header>
+<body> <!-- El body DEBE empezar antes de todo el contenido visual -->
 
-<body>
-    <nav>
-        <ul class="lista-Nav">
-            <li><a href="#">Inicio</a></li>
-            <li><a href="#">Lista Completa</a></li>
-        </ul>
-    </nav>
-    <form id="formulario-navidad">
+    <header id="Header">
+        <nav>
+            <ul class="lista-Nav">
+                <!-- Nota: Respeté tu L mayúscula en los IDs -->
+                <li><a id="Link-inicio" href="#">Inicio</a></li>
+                <li><a id="Link-fotos" href="#">Fotos Navideñas</a></li>
+            </ul>
+        </nav>
+        <h1 id="Titulo">Bienvenidos</h1>
+    </header>
 
-        <section>
-            <label for="nombre">Nombre:</label>
-            <input type="text" id="nombre" name="nombre" placeholder="Nombre">
+    <!-- AGRUPAMOS LA VISTA INICIO -->
+    <main id="vista-inicio">
+
+        <form id="formulario-navidad">
+            <section>
+                <label for="nombre">Nombre:</label>
+                <input type="text" id="nombre" name="nombre" placeholder="Nombre">
+            </section>
+            <section>
+                <label for="apellido">Apellido:</label>
+                <input type="text" id="apellido" name="apellido" placeholder="Apellido">
+            </section>
+            <section>
+                <label for="regalo">¿Qué quiero por Navidad?:</label>
+                <input type="text" id="regalo" name="regalo" placeholder="Ej. Un viaje a cancun">
+            </section>
+            <button id="boton-formulario">Enviar</button>
+        </form>
+
+        <section id="seccion-lista">
+            <h2>Lista de Deseos Actual</h2>
+            <table id="tabla-lista-regalos">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Apellido</th>
+                        <th>Regalo</th>
+                    </tr>
+                </thead>
+                <tbody id="cuerpo-tabla-regalos">
+                </tbody>
+            </table>
         </section>
 
-        <section>
-            <label for="apellido">Apellido:</label>
-            <input type="text" id="apellido" name="apellido" placeholder="Apellido">
-        </section>
+    </main> <!-- FIN DE VISTA INICIO -->
 
-        <section>
-            <label for="regalo">¿Qué quiero por Navidad?:</label>
-            <input type="text" id="regalo" name="regalo" placeholder="Ej. Un viaje a cancun">
-        </section>
-        <button id="boton-formulario">Enviar</button>
+    <!-- VISTA FOTOS (Oculta por defecto) -->
+    <main id="vista-fotos" class="oculto">
+        <section class="galeria-grid">
+            <img src="IMG/foto1.jpg" alt="Foto Navideña 1">
+            <img src="IMG/foto2.jpg" alt="Foto Navideña 2">
+            <img src="IMG/foto3.jpg" alt="Foto Navideña 3">
 
-    </form>
-    <section id="seccion-lista">
-        <h2>Lista de Deseos Actual</h2>
-        <table id="tabla-lista-regalos">
-            <thead>
-                <tr> <!-- Los encabezados deben ir en una fila -->
-                    <th>Nombre</th>
-                    <th>Apellido</th>
-                    <th>Regalo</th>
-                </tr>
-            </thead>
-            <!-- Aquí inyectaremos los datos con JS -->
-            <tbody id="cuerpo-tabla-regalos">
-            </tbody>
-        </table>
-    </section>
+        </section>
+    </main> <!-- FIN DE VISTA FOTOS -->
+
+    <footer>
+        <p>Felices fiestas navideñas y año nueveras 🎄🎅</p>
+        <p class="footer-anio">2026 -> 2027</p>
+    </footer>
+
     <script type="module" src="main.js"></script>
 </body>
 
