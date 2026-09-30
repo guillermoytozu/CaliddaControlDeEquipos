@@ -151,17 +151,16 @@ nav {
 /* Diseño moderno para la galería de fotos */
 .galeria-grid {
     display: grid;
-    /* Esto hace que las fotos se acomoden solas en varias columnas */
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+
     gap: 20px;
     padding: 20px;
-    max-width: 900px;
+
     margin: 0 auto;
 }
 
 .galeria-grid img {
     width: 100%;
-    height: 250px;
+
     object-fit: cover;
     /* Evita que las fotos se deformen o aplasten */
     border-radius: 12px;
