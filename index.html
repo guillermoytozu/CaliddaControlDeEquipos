@@ -2,7 +2,7 @@
 <html>
 
 <head>
-    <title>RegalosNavidad2026</title>
+    <title>Control de Equipos Calidda</title>
     <link rel="stylesheet" href="style.css">
     <link rel="icon" type="image/x-icon" href="/favicon.ico?v=2">
 </head>
@@ -13,17 +13,18 @@
         <ul class="lista-Nav">
             <!-- Nota: Respeté tu L mayúscula en los IDs -->
             <li><a id="Link-inicio" href="#">Inicio</a></li>
-            <li><a id="Link-fotos" href="#">Fotos Navideñas</a></li>
+            <li><a id="Link-fotos" href="#">Inventario</a></li>
         </ul>
     </nav>
     <header id="header">
-        <h1 id="Titulo">Bienvenidos</h1>
+        <div class="izq"><Img src="IMG/logo.png"></div>
+        <h1 class="der" id="Titulo">Bienvenidos</h1>
     </header>
 
     <!-- AGRUPAMOS LA VISTA INICIO -->
     <main id="vista-inicio">
 
-        <form id="formulario-navidad">
+        <form id="formulario-equipos">
             <section>
                 <label for="nombre">Nombre:</label>
                 <input type="text" id="nombre" name="nombre" placeholder="Nombre">
@@ -33,43 +34,52 @@
                 <input type="text" id="apellido" name="apellido" placeholder="Apellido">
             </section>
             <section>
-                <label for="regalo">¿Qué quiero por Navidad?:</label>
-                <input type="text" id="regalo" name="regalo" placeholder="Ej. Un viaje a cancun">
+                <label for="equipo">Equipo:</label>
+                <input type="text" id="equipo" name="equipo" placeholder="Ej. Radio detection ">
             </section>
+            <section>
+                <label for="ubicacion">Ubicación:</label>
+                <input type="text" id="ubicacion" name="ubicacion" placeholder="Alamcén sótano 5 ">
+            </section>
+            <section>
+                <label for="movimiento">Movimiento:</label>
+                <input type="text" id="movimiento" name="movimiento" placeholder="Ingreso / Salida">
+            </section>
+
             <button id="boton-formulario">Enviar</button>
         </form>
 
         <section id="seccion-lista">
-            <h2>Lista de Deseos Actual</h2>
-            <table id="tabla-lista-regalos">
+            <h2>Trazabilidad de equipos</h2>
+            <table id="tabla-lista-equipos">
                 <thead>
                     <tr>
                         <th>Nombre</th>
                         <th>Apellido</th>
-                        <th>Regalo</th>
+                        <th>Equipo</th>
+                        <th>Ubicación</th>
+                        <th>Movimiento</th>
+                        <th>Fecha</th>
+                        <th>Hora</th>
                     </tr>
                 </thead>
-                <tbody id="cuerpo-tabla-regalos">
+                <tbody id="cuerpo-tabla-equipos">
                 </tbody>
             </table>
         </section>
 
-    </main> <!-- FIN DE VISTA INICIO -->
+    </main>
 
     <!-- VISTA FOTOS (Oculta por defecto) -->
     <main id="vista-fotos" class="oculto">
-        <section class="galeria-grid">
-            <img src="IMG/foto1.jpg" alt="Foto Navideña 1">
-            <img src="IMG/foto2.jpg" alt="Foto Navideña 2">
-            <img src="IMG/foto3.JPG" alt="Foto Navideña 3">
-            <img src="IMG/foto4.jpg" alt="Foto Navideña 3">
+        <section class="inventario">
 
         </section>
-    </main> <!-- FIN DE VISTA FOTOS -->
+    </main>
 
     <footer>
-        <p>Felices fiestas navideñas y año nueveras 🎄🎅</p>
-        <p class="footer">2026 -> 2027</p>
+        <p>Calidda - Derechos reservados</p>
+        <p class="footer">2026</p>
     </footer>
 
     <script type="module" src="main.js"></script>

@@ -1,11 +1,9 @@
 let titulo = document.getElementById('Titulo');
-titulo.textContent = 'Hola mundo';
-titulo.innerHTML = 'Regalo Secreto <br> Navidad 2026'
-
+titulo.innerHTML = 'CONTROL DE EQUIPOS <br> CÁLIDDA';
 
 //-------------------------------------------------------------------------------------------------------------
 
-let formulario = document.getElementById('formulario-navidad');
+let formulario = document.getElementById('formulario-equipos');
 let botonFormulario = document.getElementById('boton-formulario');
 formulario.addEventListener('submit', enviarFormulario);
 
@@ -20,19 +18,23 @@ async function enviarFormulario(e) {
     // 2. Capturamos los valores
     const nombre = document.getElementById('nombre').value;
     const apellido = document.getElementById('apellido').value;
-    const regalo = document.getElementById('regalo').value;
+    const equipo = document.getElementById('equipo').value;
+    const ubicacion = document.getElementById('ubicacion').value;
+    const movimiento = document.getElementById('movimiento').value;
 
     // 3. Creamos el objeto JSON
     const datosFormulario = {
         nombre: nombre,
         apellido: apellido,
-        regalo: regalo
+        equipo: equipo,
+        ubicacion: ubicacion,
+        movimiento: movimiento
     };
 
     console.log("JSON a enviar:", JSON.stringify(datosFormulario));
 
     // 4. Enviamos los datos
-    const urlAPI = "https://script.google.com/macros/s/AKfycbwdR7WPevx7l1e_4OJb3OdCbHVhINYRueYq0WRN5gIsc3QaWSiPYyWsjVn_i8zdqMWv/exec"
+    const urlAPI = "https://script.google.com/macros/s/AKfycbxxC475VDMbyw74GbWqLYm8x2FIFPi-OuQujPDO59VR9EcIz3LH8ZH52MwKgARGvsJ9/exec"
 
     try {
         const respuesta = await fetch(urlAPI, {
@@ -64,11 +66,11 @@ async function enviarFormulario(e) {
 //-------------------------------------------------------------------------------------------------------------
 
 // Agrega un contenedor en tu HTML para mostrar la lista (ej. <div id="lista-regalos"></div>)
-const contenedorRegalos = document.getElementById('cuerpo-tabla-regalos');
+const contenedorRegalos = document.getElementById('cuerpo-tabla-equipos');
 
 async function cargarRegalos() {
     // Usa exactamente la misma URL que ya tienes para el POST
-    const urlAPI = "https://script.google.com/macros/s/AKfycbwdR7WPevx7l1e_4OJb3OdCbHVhINYRueYq0WRN5gIsc3QaWSiPYyWsjVn_i8zdqMWv/exec";
+    const urlAPI = "https://script.google.com/macros/s/AKfycbxxC475VDMbyw74GbWqLYm8x2FIFPi-OuQujPDO59VR9EcIz3LH8ZH52MwKgARGvsJ9/exec";
 
     try {
         // Hacemos la petición GET (no necesita configuraciones extra)
@@ -99,12 +101,17 @@ function dibujarLista(datos) {
 
         console.log(dato);
         const fila = document.createElement('tr');
+        const fechaLocal = new Date(dato.date).toLocaleString("es-PE", { hour12: false });
 
         // 2. Metemos las 3 columnas (<td>) en esa misma fila
         fila.innerHTML = `
             <td>${dato.nombre}</td>
             <td>${dato.apellido}</td>
-            <td>${dato.regalo}</td>
+            <td>${dato.equipo}</td>
+            <td>${dato.ubicacion}</td>
+            <td>${dato.movimiento}</td>
+            <td>${fechaLocal.split(',')[0]}</td>
+            <td>${fechaLocal.split(',')[1].slice(0, 6)}</td>
         `;
 
         // 3. Agregamos la fila terminada al cuerpo de la tabla

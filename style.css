@@ -1,18 +1,36 @@
 Body {
     font-family: Verdana, Geneva, Tahoma, sans-serif;
-    background-color: rgb(250, 246, 240);
+    background-color: rgb(207, 226, 233);
 }
 
 #header {
+    display: grid;
+    /* Creamos 3 columnas: la 1ra y 3ra toman el espacio sobrante (1fr), la del medio se ajusta al contenido (auto) */
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    /* Esto los centra verticalmente a la misma altura */
     width: 100%;
-    padding-top: 15px;
+    padding: 10px 20px;
+    /* Espaciado opcional */
+    box-sizing: border-box;
+}
+
+.izquierda {
+    /* Por defecto cae en la primera columna (izquierda) */
+    justify-self: start;
+}
+
+.centro {
+    /* Forzamos a que este elemento se ubique en la segunda columna (centro) */
+    grid-column: 2;
+    justify-self: center;
 }
 
 nav {
     position: sticky;
     top: 0;
     z-index: 1000;
-    background-color: rgba(250, 246, 240, 0.85);
+    background-color: rgba(0, 161, 222, 0.85);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     padding: 10px 0;
@@ -58,30 +76,31 @@ nav {
 
 }
 
-#formulario-navidad {
+#formulario-equipos {
     margin-top: 20px;
     display: grid;
-    grid-template-columns: auto 250px;
-    gap: 15px 15px;
+    grid-template-columns: auto 450px;
+    gap: 10px 10px;
     justify-content: center;
     align-items: center;
+    font-size: 20px;
 }
 
-#formulario-navidad section {
+#formulario-equipos section {
     display: contents;
 }
 
-#formulario-navidad label {
+#formulario-equipos label {
     text-align: left;
 }
 
-#formulario-navidad input {
+#formulario-equipos input {
     padding: 8px;
     width: 100%;
     box-sizing: border-box;
 }
 
-#formulario-navidad button {
+#formulario-equipos button {
     grid-column: 1 / -1;
     padding: 10px;
     margin-top: 10px;
@@ -96,7 +115,7 @@ nav {
 }
 
 /* 2. Estilo principal de la tabla */
-#tabla-lista-regalos {
+#tabla-lista-equipos {
     margin: 0 auto;
     /* Centra la tabla horizontalmente */
     border-collapse: collapse;
@@ -114,8 +133,8 @@ nav {
     /* Crucial para que el thead respete los bordes redondeados */
 }
 
-/* 3. Estilo de los encabezados (Nombre, Apellido, Regalo) */
-#tabla-lista-regalos th {
+/* 3. Estilo de los encabezados (Nombre, Apellido, equipos) */
+#tabla-lista-equipos th {
     background-color: rgb(52, 59, 56);
     /* Usamos el mismo color de tu #Titulo para mantener armonía */
     color: white;
@@ -126,7 +145,7 @@ nav {
 }
 
 /* 4. Estilo de las celdas normales */
-#tabla-lista-regalos td {
+#tabla-lista-equipos td {
     padding: 12px 15px;
     border-bottom: 1px solid #e0e0e0;
     /* Una línea sutil entre filas en lugar de una cuadrícula pesada */
@@ -134,19 +153,19 @@ nav {
 }
 
 /* 5. Efecto Cebra: Colorea sutilmente las filas pares para facilitar la lectura */
-#cuerpo-tabla-regalos tr:nth-child(even) {
+#cuerpo-tabla-equipos tr:nth-child(even) {
     background-color: #f8f9fa;
 }
 
 /* 6. Efecto Hover: Resalta la fila por la que pasas el ratón */
-#cuerpo-tabla-regalos tr:hover {
+#cuerpo-tabla-equipos tr:hover {
     background-color: #f1ece5;
     /* Un tono ligeramente más oscuro que tu fondo principal */
     transition: background-color 0.2s ease;
 }
 
 /* 7. Quitamos el borde inferior de la última fila para que quede limpio */
-#cuerpo-tabla-regalos tr:last-child td {
+#cuerpo-tabla-eqiupos tr:last-child td {
     border-bottom: none;
 }
 
