@@ -123,7 +123,7 @@ function dibujarLista(datos) {
 const linkInicio = document.getElementById('Link-inicio');
 const linkFotos = document.getElementById('Link-fotos');
 const vistaInicio = document.getElementById('vista-inicio');
-const vistaFotos = document.getElementById('vista-fotos');
+const vistaFotos = document.getElementById('vista-inventario');
 
 // 2. Evento para el botón de "Fotos Navideñas"
 linkFotos.addEventListener('click', (e) => {
