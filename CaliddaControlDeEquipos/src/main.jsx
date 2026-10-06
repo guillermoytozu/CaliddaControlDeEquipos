@@ -1,16 +1,10 @@
-import React, { createElement } from 'react'
-import { createRoot } from 'react-dom/client'
-import './index.css'
-import Boton from './components/Boton.jsx'
+import React from 'react'
+import ReactDom from 'react-dom/client'
 import App from './App.jsx'
+import './index.css'
 
-
-const root = createRoot(document.getElementById('root'));
+const root = ReactDom.createRoot(document.getElementById('root'));
 
 root.render(
-  <React.Fragment>
-    <Boton texto="boton1" />
-    <Boton texto="boton2" />
-    <Boton />
-  </React.Fragment>
+  <App />
 )
