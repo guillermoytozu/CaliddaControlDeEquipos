@@ -1,3 +1,10 @@
+.div-de-botones {
+
+    display: flex;
+    flex-direction: column;
+    gap: 10px
+}
+
 .boton-css1 {
     width: 200px;
     height: 100px;
@@ -5,6 +12,8 @@
     padding: 0px;
     display: grid;
     align-items: start;
+    border: 2px solid #ccc;
+    transition: border-color 1s ease, background-color 1s ease;
 }
 
 .boton-css1 img {
@@ -18,4 +27,9 @@
     display: flex;
     flex-direction: column;
     background-color: rgb(100, 218, 218);
+}
+
+.boton-css1:hover {
+    border-color: #ee9207;
+    background-color: rgb(183, 137, 226);
 }

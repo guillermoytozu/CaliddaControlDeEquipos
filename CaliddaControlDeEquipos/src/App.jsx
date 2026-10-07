@@ -4,8 +4,10 @@ import { useState } from 'react'
 function App() {
   return (
     <>
-      <Boton avatar="guillermoytozu" booleano={true}>Botoncito</Boton>
-      <Boton avatar="plus" >Botoncito</Boton>
+      <div className='div-de-botones'>
+        <Boton avatar="guillermoytozu" booleano={true}>Botoncito</Boton>
+        <Boton avatar="plus" >Botoncito</Boton>
+      </div>
     </>
   )
 }
