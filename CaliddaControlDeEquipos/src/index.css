@@ -13,7 +13,7 @@
     display: grid;
     align-items: start;
     border: 2px solid #ccc;
-    transition: border-color 1s ease, background-color 1s ease;
+    transition: border-color .5s ease, background-color .5s ease;
 }
 
 .boton-css1 img {

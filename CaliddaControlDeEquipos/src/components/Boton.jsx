@@ -11,6 +11,7 @@ const Boton = ({ children, avatar }) => {
     return (
         <button className={buttonClassName} onClick={activarInterruptor}>
             <img alt="Avatar" src={`https://unavatar.io/github/${avatar}`} />
+            <img alt="poke" src={`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png`} />
             {children}
             <br />
             {texto}
