@@ -1,8 +1,8 @@
-const Boton = ({ texto = "Default" }) => {
+const Boton = ({ children, avatar }) => {
     return (
         <button>
-            <img alt="Gatito" src="https://purina.com.pe/sites/default/files/2022-10/Que_debes_saber_antes_de_adoptar_un_gatito.jpg" />
-            {texto}
+            <img alt="Avatar" src={`https://unavatar.io/github/${avatar}`} />
+            {children}
         </button>
     );
 }

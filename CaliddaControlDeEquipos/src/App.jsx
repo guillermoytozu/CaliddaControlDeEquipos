@@ -1,13 +1,11 @@
-import React from 'react'
 import Boton from './components/Boton.jsx'
 
 function App() {
   return (
-    <React.Fragment>
-      <Boton texto="boton1" />
-      <Boton texto="boton2" />
-      <Boton />
-    </React.Fragment>
+    <>
+      <Boton avatar="guillermoytozu">Botoncito</Boton>
+      <Boton avatar="FYtozu">Botoncito</Boton>
+    </>
   )
 }
 
