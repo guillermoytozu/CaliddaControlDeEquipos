@@ -1,11 +1,11 @@
 import { Formulario } from "../components/Formulario"
-import { Tabla } from "../components/Tabla"
+import { TablaMovimientos } from "../components/TablaMovimientos"
 
 export const PaginaInicio = () => {
     return (
         <>
             <Formulario />
-            <Tabla />
+            <TablaMovimientos />
         </>
 
     )

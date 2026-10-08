@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 
-export const Tabla = () => {
+export const TablaMovimientos = () => {
     const [equipos, setEquipos] = useState([]);
     const [cargando, setCargando] = useState(true);
     const [error, setError] = useState(false);
