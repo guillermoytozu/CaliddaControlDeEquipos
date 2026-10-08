@@ -1,3 +1,28 @@
+:root {
+    --color-calidda: #00A1DE;
+    --color-calidda-disabled: rgba(0, 161, 222, 0.5);
+    --color-calidda-hover: #2ec6ff;
+    --color-verde: #00A34B;
+    --color-verde-hover: #00bf58;
+    --color-amarillo: #FAB200;
+    --color-amarillo-hover: #ffc026;
+    --color-amarillo-2: #FEE400;
+    --color-celeste: #ECF8FC;
+    --color-rojo: red;
+    --color-gris-1: #868685;
+    --color-gris-2: #EEEEEE;
+    --color-gris-3: #868685;
+    --color-gris-4: #EAEAEA;
+    --color-gris-5: #FAFAFA;
+    --font-medium: 14px;
+    --linear-gradient: linear-gradient(90deg, var(--color-verde) 30%, var(--color-calidda) 95%, var(--color-calidda) 100%);
+    --linear-gradient-revert: linear-gradient(45deg, var(--color-calidda), var(--color-verde));
+    --linear-gradient-vertical: transparent linear-gradient(350deg, var(--color-verde) 0%, var(--color-calidda) 60%) 0% 0% no-repeat padding-box;
+    --linear-gradient-vertical-1: transparent linear-gradient(350deg, #1BA87A 0%, #01A2C8 60%) 0% 0% no-repeat padding-box;
+    --linear-gradient-vertical-2: transparent linear-gradient(0deg, #1BA87A 0%, #01A2C8 60%) 0% 0% no-repeat padding-box;
+    --border-radius: 8px;
+}
+
 body {
     font-family: Verdana, Geneva, Tahoma, sans-serif;
     background-color: rgb(207, 226, 233);
@@ -26,7 +51,7 @@ body {
 }
 
 nav {
-    background-color: rgba(0, 161, 222, 0.85);
+    background: var(--linear-gradient);
     padding: 10px 0;
     border-bottom: 1px solid #dcd3c9;
 }
@@ -42,7 +67,7 @@ nav {
 
 .lista-Nav a {
     text-decoration: none;
-    color: #1d1d1f;
+    color: var(--color-gris-2);
     font-size: 1rem;
     letter-spacing: 0.5px;
     padding: 5px 0;
@@ -72,4 +97,81 @@ nav {
 
 .boton-formulario {
     width: 20.5rem;
+}
+
+
+#seccion-lista {
+    text-align: center;
+    margin-top: 40px;
+}
+
+/* 2. Estilo principal de la tabla */
+#tabla-lista-equipos {
+    margin: 0 auto;
+    /* Centra la tabla horizontalmente */
+    border-collapse: collapse;
+    /* Une los bordes para que no haya espacios en blanco entre celdas */
+    width: 90%;
+    max-width: 700px;
+    /* Evita que la tabla sea demasiado ancha en pantallas grandes */
+    background-color: white;
+    /* Da un buen contraste contra tu fondo rgb(240, 234, 227) */
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    /* Sombra suave y moderna */
+    border-radius: 8px;
+    /* Bordes redondeados */
+    overflow: hidden;
+    /* Crucial para que el thead respete los bordes redondeados */
+}
+
+/* 3. Estilo de los encabezados (Nombre, Apellido, equipos) */
+#tabla-lista-equipos th {
+    background-color: var(--color-gris-3);
+    /* Usamos el mismo color de tu #Titulo para mantener armonía */
+    color: var(--color-gris-2);
+    padding: 15px;
+    text-align: left;
+    /* Queda mejor que centrado en las tablas */
+    font-weight: bold;
+}
+
+/* 4. Estilo de las celdas normales */
+#tabla-lista-equipos td {
+    padding: 12px 15px;
+    border-bottom: 1px solid #e0e0e0;
+    /* Una línea sutil entre filas en lugar de una cuadrícula pesada */
+    text-align: left;
+}
+
+/* 5. Efecto Cebra: Colorea sutilmente las filas pares para facilitar la lectura */
+#cuerpo-tabla-equipos tr:nth-child(even) {
+    background-color: #f8f9fa;
+}
+
+/* 6. Efecto Hover: Resalta la fila por la que pasas el ratón */
+#cuerpo-tabla-equipos tr:hover {
+    background-color: #f1ece5;
+    /* Un tono ligeramente más oscuro que tu fondo principal */
+    transition: background-color 0.2s ease;
+}
+
+/* 7. Quitamos el borde inferior de la última fila para que quede limpio */
+#cuerpo-tabla-eqiupos tr:last-child td {
+    border-bottom: none;
+}
+
+footer {
+    background: var(--linear-gradient-vertical-1);
+    color: var(--color-gris-2);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border-top: 5px solid rgb(177, 177, 177);
+    margin-top: 10px;
+    gap: 3px;
+}
+
+footer>* {
+
+    margin: 3px;
 }

@@ -1,6 +1,8 @@
 import { Formulario } from './components/Formulario'
-import { useState } from 'react'
+import { Footer } from './components/Footer';
 import { Navegacion } from './components/Navegacion';
+import { Tabla } from './components/Tabla';
+import { useState } from 'react'
 
 function App() {
   return (
@@ -10,7 +12,10 @@ function App() {
         <li><a id="Link-fotos" href="#">Inventario</a></li>
       </Navegacion>
       <Formulario></Formulario>
-
+      <Tabla></Tabla>
+      <Footer año="2026">
+        Calidda - Derechos reservados
+      </Footer>
     </>
   );
 }
