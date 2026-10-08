@@ -1,16 +1,18 @@
-import Boton from './components/Boton.jsx'
+import { Formulario } from './components/Formulario'
 import { useState } from 'react'
+import { Navegacion } from './components/Navegacion';
 
 function App() {
   return (
     <>
-      <div className='div-de-botones'>
-        <Boton avatar="guillermoytozu" booleano={true}>Botoncito</Boton>
-        <Boton avatar="plus" >Botoncito</Boton>
-        <Boton avatar="ultra" >Botoncito</Boton>
-      </div>
+      <Navegacion>
+        <li><a id="Link-inicio" href="#">Inicio</a></li>
+        <li><a id="Link-fotos" href="#">Inventario</a></li>
+      </Navegacion>
+      <Formulario></Formulario>
+
     </>
-  )
+  );
 }
 
 export default App

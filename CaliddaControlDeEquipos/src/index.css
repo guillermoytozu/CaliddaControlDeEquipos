@@ -1,35 +1,75 @@
-.div-de-botones {
-
-    display: flex;
-    flex-direction: column;
-    gap: 10px
+body {
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+    background-color: rgb(207, 226, 233);
 }
 
-.boton-css1 {
-    width: 200px;
-    height: 100px;
-    margin: 0px;
-    padding: 0px;
+#header {
     display: grid;
-    align-items: start;
-    border: 2px solid #ccc;
-    transition: border-color .5s ease, background-color .5s ease;
+    grid-template-columns: 100%;
+    place-items: center;
+    width: 100%;
+    Margin: 0px;
 }
 
-.boton-css1 img {
-    width: 25%;
-    height: auto;
-    margin: 0px;
-    padding: 0px;
+#header img {
+    width: 13rem;
+    margin-right: 15px;
 }
 
-.boton-css2 {
+#titulo {
+    color: rgb(52, 59, 56);
+    text-align: center;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    font-size: 27px;
+
+}
+
+nav {
+    background-color: rgba(0, 161, 222, 0.85);
+    padding: 10px 0;
+    border-bottom: 1px solid #dcd3c9;
+}
+
+.lista-Nav {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.lista-Nav a {
+    text-decoration: none;
+    color: #1d1d1f;
+    font-size: 1rem;
+    letter-spacing: 0.5px;
+    padding: 5px 0;
+    transition: opacity 0.2s ease;
+}
+
+.lista-Nav a:hover {
+    opacity: 0.6;
+}
+
+.formulario-equipos {
     display: flex;
     flex-direction: column;
-    background-color: rgb(100, 218, 218);
+    align-items: center;
+    width: 100%;
+    gap: 5px;
 }
 
-.boton-css1:hover {
-    border-color: #ee9207;
-    background-color: rgb(183, 137, 226);
+.formulario-equipos input {
+    width: 20rem;
+    font-size: 1rem;
+}
+
+.formulario-equipos label {
+    font-size: 1.3rem;
+}
+
+.boton-formulario {
+    width: 20.5rem;
 }

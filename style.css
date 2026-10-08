@@ -15,17 +15,6 @@ Body {
     box-sizing: border-box;
 }
 
-.izquierda {
-    /* Por defecto cae en la primera columna (izquierda) */
-    justify-self: start;
-}
-
-.centro {
-    /* Forzamos a que este elemento se ubique en la segunda columna (centro) */
-    grid-column: 2;
-    justify-self: center;
-}
-
 nav {
     position: sticky;
     top: 0;
