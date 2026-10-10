@@ -57,8 +57,8 @@ export const Formulario = () => {
 
     return (
         <form className="formulario-equipos" onSubmit={handleSubmit}>
-            <TextInput name="nombre" value={data.nombre} onChange={handleChange} placeholder="Nombre">Nombre: </TextInput>
-            <TextInput name="apellido" value={data.apellido} onChange={handleChange} placeholder="Apellido">Apellido: </TextInput>
+            <TextInput name="nombre" id="input-nombre" value={data.nombre} onChange={handleChange} placeholder="Nombre">Nombre: </TextInput>
+            <TextInput name="apellido" id="input-apellido" value={data.apellido} onChange={handleChange} placeholder="Apellido">Apellido: </TextInput>
             <SelectInput name="equipo" value={data.equipo} onChange={handleChange} opciones={opcionesEquipo}>Equipo: </SelectInput>
             <SelectInput name="ubicacion" value={data.ubicacion} onChange={handleChange} opciones={opcionesUbicacion}>Ubicación: </SelectInput>
             <RadioButton name="movimiento" value={data.movimiento} onChange={handleChange} opciones={opcionesMovimiento}>Movimiento: </RadioButton>

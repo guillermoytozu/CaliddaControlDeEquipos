@@ -1,10 +1,11 @@
 import { useState } from "react";
 
-export const TextInput = ({ children, placeholder, name, value, onChange }) => {
+export const TextInput = ({ children, id, placeholder, name, value, onChange }) => {
     return (
         <>
-            <label>{children}</label>
+            <label htmlFor={id}>{children}</label>
             <input
+                id={id}
                 type="text"
                 name={name}
                 placeholder={placeholder}
