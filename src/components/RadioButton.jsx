@@ -27,20 +27,18 @@ export const RadioButton = ({ children, name, value, onChange, opciones }) => {
 
             <div className="radio-button">
                 {opciones.map((opcion, index) => {
-                    // Generamos un ID único combinando el name ("movimiento") y el índice
                     const idUnico = `${name}-${index}`;
 
                     return (
                         <div key={index}>
                             <input
                                 type="radio"
-                                id={idUnico}            // 1. Asignamos el ID al input
+                                id={idUnico}
                                 name={name}
                                 value={opcion}
                                 checked={value === opcion}
                                 onChange={onChange}
                             />
-                            {/* 2. Envolvemos el texto en un label con htmlFor */}
                             <label htmlFor={idUnico}>
                                 {opcion}
                             </label>
