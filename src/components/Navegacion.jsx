@@ -5,6 +5,7 @@ export const Navegacion = () => {
         <nav>
             <ul className="lista-Nav">
                 {/* Cambiamos <a> por <Link> y href por to */}
+                <li><Link id="Link-login" to="/login">Login</Link></li>
                 <li><Link id="Link-inicio" to="/inicio">Inicio</Link></li>
                 <li><Link id="Link-fotos" to="/inventario">Inventario</Link></li>
             </ul>

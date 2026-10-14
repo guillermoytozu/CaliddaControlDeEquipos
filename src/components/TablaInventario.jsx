@@ -1,29 +1,32 @@
 import { useState, useEffect } from "react";
+import { supabase } from "../supabase/supabaseClient";
 
 export const TablaInventario = () => {
     const [equipos, setEquipos] = useState([]);
     const [cargando, setCargando] = useState(true);
-    const [error, setError] = useState(false);
 
     useEffect(() => {
-        const cargarDatos = async () => {
-            const urlAPI = "https://script.google.com/macros/s/AKfycbxxC475VDMbyw74GbWqLYm8x2FIFPi-OuQujPDO59VR9EcIz3LH8ZH52MwKgARGvsJ9/exec";
-
+        const obtenerInventario = async () => {
             try {
-                const respuesta = await fetch(urlAPI);
-                const datos = await respuesta.json();
+                const { data, error } = await supabase
+                    .from("inventarioequipos")
+                    .select("*")
+                    .order("id_equipo", { ascending: true });
 
-                setEquipos(datos);
-                setCargando(false);
-            } catch (err) {
-                console.error("Error al cargar los datos:", err);
-                setError(true);
+                if (error) throw error;
+
+                if (data) {
+                    setEquipos(data);
+                }
+            } catch (error) {
+                console.error("Error al obtener los equipos:", error.message);
+            } finally {
                 setCargando(false);
             }
         };
-
-        cargarDatos();
+        obtenerInventario();
     }, []);
+
 
     return (
         <section id="seccion-lista">
@@ -36,38 +39,41 @@ export const TablaInventario = () => {
                         <th>Ubicación</th>
                         <th>Nombre</th>
                         <th>Apellido</th>
-                        <th>Fecha</th>
-                        <th>Hora</th>
                     </tr>
                 </thead>
                 <tbody id="cuerpo-tabla-equipos">
 
-                    {cargando && (
-                        <tr><td colSpan="7" style={{ textAlign: 'center' }}>Cargando lista...</td></tr>
-                    )}
+                    {cargando ? (
+                        <tr>
+                            <td colSpan="5" style={{ textAlign: "center" }}>Cargando inventario...</td>
+                        </tr>
+                    ) : equipos.length === 0 ? (
+                        <tr>
+                            <td colSpan="5" style={{ textAlign: "center" }}>No hay equipos registrados</td>
+                        </tr>
+                    ) : (
+                        equipos.map((equipo) => (
+                            <tr key={equipo.id_equipo}>
+                                {/* Concatenamos el tipo, marca y modelo */}
+                                <td> {equipo.marca} {equipo.modelo}</td>
 
-                    {error && (
-                        <tr><td colSpan="7" style={{ textAlign: 'center', color: 'red' }}>Error al cargar la lista.</td></tr>
-                    )}
+                                {/* Transformamos el valor booleano TRUE/FALSE en texto */}
+                                <td>
+                                    <span style={{
+                                        color: equipo.disponibilidad ? "var(--color-verde)" : "var(--color-rojo)",
+                                        fontWeight: "bold"
+                                    }}>
+                                        {equipo.disponibilidad ? "Disponible" : "Alguien más lo tiene"}
+                                    </span>
+                                </td>
 
-                    {!cargando && !error && equipos.map((dato, index) => {
-
-                        const fechaYHora = new Date(dato.date).toLocaleString("es-PE", { hour12: false });
-                        const fecha = fechaYHora.split(',')[0];
-                        const hora = fechaYHora.split(',')[1].trim().slice(0, 5);
-
-                        return (
-                            <tr key={index}>
-                                <td>{dato.equipo}</td>
-                                <td>{dato.apellido}</td>
-                                <td>{dato.ubicacion}</td>
-                                <td>{dato.nombre}</td>
-                                <td>{dato.apellido}</td>
-                                <td>{fecha}</td>
-                                <td>{hora}</td>
+                                {/* Dejamos estos campos con un guion ya que no vienen de esta tabla específica */}
+                                <td>-</td>
+                                <td>-</td>
+                                <td>-</td>
                             </tr>
-                        );
-                    })}
+                        ))
+                    )}
 
                 </tbody>
             </table>

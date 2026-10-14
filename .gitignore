@@ -26,3 +26,6 @@ dist-ssr
 # Env files
 .env
 .env.*
+
+# Secret
+client_secret_1088543351940-jc4o8006jn5bniokc4r85fojb7ev7esg.apps.googleusercontent.com.json

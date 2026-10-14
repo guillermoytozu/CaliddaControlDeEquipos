@@ -5,8 +5,28 @@ import { BotonFormulario } from "./BotonFormulario";
 import { useState } from "react";
 
 
-const opcionesEquipo = ["Radio detection", "Multímetro", "Taladro", "Grua excavadora"];
-const opcionesUbicacion = ["Almacén sótano 1", "Almacén sótano 2", "Almacén sótano 3"];
+const opcionesEquipo = [
+    "Localizador de tuberías - Radiodetection RD8200G",
+    "Detector multigas - MSA Altair 4XR",
+    "Detector láser de metano - Heath Consultants RMLD-CS",
+    "Máquina de electrofusión - Georg Fischer MSA 330",
+    "Prensa estranguladora manual - Reed PES2",
+    "Cortatubos tipo guillotina - Reed HPC4",
+    "Raspador rotativo - Ritmo RTC 160",
+    "Llave Stillson - EGA Master 70154",
+    "Manómetro digital - Keller LEO 2",
+    "Detector de defectos - Tinker & Rasor APS",
+    "Roscadora eléctrica - Ridgid 690-I",
+    "Multímetro industrial - Fluke 28 II Rugged",
+    "Alineador mecánico - Ritmo 63-200"
+];
+const opcionesUbicacion = [
+    "Almacén sótano 5",
+    "Centro de Distribución y Logística Principal (Lurín)",
+    "Base Operativa Norte (San Martín de Porres)",
+    "Unidad Móvil de Emergencias (Vehículo Táctico)",
+    "Laboratorio de Calibración y Mantenimiento"
+];
 const opcionesMovimiento = ["Ingreso", "Salida"];
 
 export const Formulario = () => {
@@ -14,9 +34,9 @@ export const Formulario = () => {
         nombre: "",
         apellido: "",
         equipo: opcionesEquipo[0],
-        ubicacion: opcionesMovimiento[0],
+        ubicacion: opcionesUbicacion[0],
         observacion: "",
-        movimiento: "Salida"
+        movimiento: opcionesMovimiento[1]
     });
 
 
@@ -49,7 +69,7 @@ export const Formulario = () => {
                 });
                 console.log("Datos enviados correctamente");
 
-                setData({ nombre: "", apellido: "", equipo: "", ubicacion: "", movimiento: "Salida" });
+                setData({ nombre: "", apellido: "", equipo: opcionesEquipo[0], ubicacion: opcionesMovimiento[0], movimiento: opcionesMovimiento[1] });
             } catch (error) {
                 console.error("Error al enviar los datos:", error);
             }
