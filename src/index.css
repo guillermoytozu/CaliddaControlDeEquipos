@@ -85,6 +85,10 @@ nav {
     justify-self: center;
     width: 30rem;
     gap: 7px;
+    border: 1px solid var(--color-gris-3);
+    border-radius: 10px;
+    padding: 20px;
+    margin-top: 20px;
 }
 
 
@@ -135,57 +139,40 @@ nav {
 
 
 
-/* 2. Estilo principal de la tabla */
 #tabla-lista-equipos {
     margin: 0 auto;
-    /* Centra la tabla horizontalmente */
     border-collapse: collapse;
-    /* Une los bordes para que no haya espacios en blanco entre celdas */
     width: 90%;
     max-width: 700px;
-    /* Evita que la tabla sea demasiado ancha en pantallas grandes */
     background-color: white;
-    /* Da un buen contraste contra tu fondo rgb(240, 234, 227) */
     box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-    /* Sombra suave y moderna */
     border-radius: 8px;
-    /* Bordes redondeados */
     overflow: hidden;
-    /* Crucial para que el thead respete los bordes redondeados */
 }
 
-/* 3. Estilo de los encabezados (Nombre, Apellido, equipos) */
 #tabla-lista-equipos th {
     background-color: var(--color-gris-3);
-    /* Usamos el mismo color de tu #Titulo para mantener armonía */
     color: var(--color-gris-2);
     padding: 15px;
     text-align: left;
-    /* Queda mejor que centrado en las tablas */
     font-weight: bold;
 }
 
-/* 4. Estilo de las celdas normales */
 #tabla-lista-equipos td {
     padding: 12px 15px;
     border-bottom: 1px solid #e0e0e0;
-    /* Una línea sutil entre filas en lugar de una cuadrícula pesada */
     text-align: left;
 }
 
-/* 5. Efecto Cebra: Colorea sutilmente las filas pares para facilitar la lectura */
 #cuerpo-tabla-equipos tr:nth-child(even) {
     background-color: #f8f9fa;
 }
 
-/* 6. Efecto Hover: Resalta la fila por la que pasas el ratón */
 #cuerpo-tabla-equipos tr:hover {
     background-color: #f1ece5;
-    /* Un tono ligeramente más oscuro que tu fondo principal */
     transition: background-color 0.2s ease;
 }
 
-/* 7. Quitamos el borde inferior de la última fila para que quede limpio */
 #cuerpo-tabla-eqiupos tr:last-child td {
     border-bottom: none;
 }

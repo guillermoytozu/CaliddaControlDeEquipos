@@ -61,6 +61,7 @@ export const Formulario = () => {
             <TextInput name="apellido" id="input-apellido" value={data.apellido} onChange={handleChange} placeholder="Apellido">Apellido: </TextInput>
             <SelectInput name="equipo" value={data.equipo} onChange={handleChange} opciones={opcionesEquipo}>Equipo: </SelectInput>
             <SelectInput name="ubicacion" value={data.ubicacion} onChange={handleChange} opciones={opcionesUbicacion}>Ubicación: </SelectInput>
+            <TextInput name="observacion" id="observacion" value={data.observacion} onChange={handleChange} placeholder="observacion">Observacion: </TextInput>
             <RadioButton name="movimiento" value={data.movimiento} onChange={handleChange} opciones={opcionesMovimiento}>Movimiento: </RadioButton>
             <BotonFormulario className="boton-formulario">Enviar</BotonFormulario>
         </form>
