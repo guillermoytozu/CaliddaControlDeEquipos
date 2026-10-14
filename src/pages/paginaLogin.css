@@ -1,7 +1,7 @@
 .login-container {
     display: flex;
     justify-content: center;
-    align-items: center;
+    align-items: flex-start;
     min-height: 65vh;
     padding: 20px;
 }
