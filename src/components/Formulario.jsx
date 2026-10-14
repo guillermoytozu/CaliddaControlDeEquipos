@@ -13,8 +13,9 @@ export const Formulario = () => {
     const [data, setData] = useState({
         nombre: "",
         apellido: "",
-        equipo: "",
-        ubicacion: "",
+        equipo: opcionesEquipo[0],
+        ubicacion: opcionesMovimiento[0],
+        observacion: "",
         movimiento: "Salida"
     });
 
