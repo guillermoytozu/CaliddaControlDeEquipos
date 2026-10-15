@@ -43,10 +43,6 @@ export const TablaInventario = () => {
                 <p className="tabla-subtitulo">Estado y asignación de todos los equipos registrados</p>
             </div>
 
-            <div className="tabla-scroll-hint" aria-hidden="true">
-                <span>⟷ Desliza horizontalmente para ver más</span>
-            </div>
-
             <div className="tabla-responsive-container">
                 <table id="tabla-lista-equipos" className="tabla-datos">
                     <thead>
@@ -87,7 +83,7 @@ export const TablaInventario = () => {
 
                                         <td>
                                             <span className={`badge-disponibilidad ${estaDisponible ? 'disponible' : 'en-uso'}`}>
-                                                <span className="badge-dot" aria-hidden="true"></span>
+                                                
                                                 {estaDisponible ? "Disponible" : "En uso"}
                                             </span>
                                         </td>

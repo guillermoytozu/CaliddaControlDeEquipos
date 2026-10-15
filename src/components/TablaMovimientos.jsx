@@ -45,10 +45,6 @@ export const TablaMovimientos = () => {
                 <p className="tabla-subtitulo">Historial completo de salidas e ingresos de equipos</p>
             </div>
 
-            <div className="tabla-scroll-hint" aria-hidden="true">
-                <span>⟷ Desliza horizontalmente para ver más</span>
-            </div>
-
             <div className="tabla-responsive-container">
                 <table id="tabla-lista-equipos" className="tabla-datos">
                     <thead>

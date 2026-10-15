@@ -27,16 +27,6 @@
     margin: 0;
 }
 
-.tabla-scroll-hint {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    font-size: 0.78rem;
-    color: var(--color-calidda-dark);
-    margin-bottom: 0.4rem;
-    font-weight: 600;
-}
-
 .tabla-responsive-container {
     width: 100%;
     overflow-x: auto;
@@ -106,7 +96,6 @@
     display: inline-flex;
     align-items: center;
     padding: 0.25rem 0.7rem;
-    border-radius: var(--border-radius-full);
     font-size: 0.78rem;
     font-weight: 700;
     letter-spacing: 0.02em;
@@ -114,15 +103,11 @@
 }
 
 .badge-movimiento.salida {
-    background-color: #fee2e2;
     color: #b91c1c;
-    border: 1px solid #fca5a5;
 }
 
 .badge-movimiento.ingreso {
-    background-color: #dcfce7;
     color: #15803d;
-    border: 1px solid #86efac;
 }
 
 /* Tablet y Desktop */
