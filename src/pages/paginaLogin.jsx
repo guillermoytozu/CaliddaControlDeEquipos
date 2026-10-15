@@ -13,7 +13,7 @@ export const PaginaLogin = () => {
         const { error } = await supabase.auth.signInWithOAuth({
             provider: 'google',
             options: {
-                redirectTo: window.location.origin + import.meta.env.BASE_URL + "inicio",
+                redirectTo: window.location.origin + import.meta.env.BASE_URL,
                 queryParams: {
                     prompt: 'select_account'
                 }
