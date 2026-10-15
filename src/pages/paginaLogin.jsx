@@ -1,25 +1,14 @@
-import { useEffect, useState } from 'react';
-import { supabase } from '../supabase/supabaseClient'
+import { useAuth } from '../context/AuthContext'; // 1. Importas tu hook personalizado
+import { supabase } from '../supabase/supabaseClient';
 import { useNavigate } from 'react-router-dom';
-import './paginaLogin.css'
+import './paginaLogin.css';
 
 export const PaginaLogin = () => {
-    const [user, setUser] = useState(null);
+    // 2. Extraes el usuario directamente del contexto global
+    const { user } = useAuth();
     const navigate = useNavigate();
 
-    useEffect(() => {
-        // Obtener la sesión actual al cargar
-        supabase.auth.getSession().then(({ data: { session } }) => {
-            setUser(session?.user || null);
-        });
-
-        // Escuchar cambios (login / logout)
-        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-            setUser(session?.user || null);
-        });
-
-        return () => subscription.unsubscribe();
-    }, []);
+    // (Eliminamos por completo el useState y el useEffect que tenías antes)
 
     const signInWithGoogle = async () => {
         const { error } = await supabase.auth.signInWithOAuth({
@@ -44,16 +33,19 @@ export const PaginaLogin = () => {
                     <div className="profile-info">
                         <h3>Bienvenido, {user.user_metadata?.full_name}</h3>
                         <img src={user.user_metadata?.avatar_url} alt="Avatar" className="avatar-img" />
+
+                        {/* Nota: si en auth.users no estás guardando el email, esto podría estar vacío. 
+                            Google sí devuelve el email en la metadata a veces, o en user.email */}
                         <p>{user.email}</p>
+
                         <button onClick={() => navigate('/inicio')} className="btn-primary">Ir al Sistema</button>
                         <button onClick={signOut} className="btn-logout">Cerrar Sesión</button>
                     </div>
                 ) : (
                     <div className="auth-prompt">
                         <h2>Acceso al Sistema</h2>
-                        <p>Por favor, inicia sesión con tu cuenta de google para continuar.</p>
+                        <p>Por favor, inicia sesión con tu cuenta de Google para continuar.</p>
                         <button onClick={signInWithGoogle} className="btn-google">
-
                             Iniciar sesión
                         </button>
                     </div>

@@ -3,6 +3,8 @@ import { SelectInput } from "./SelectInput";
 import { RadioButton } from "./RadioButton";
 import { BotonFormulario } from "./BotonFormulario";
 import { useState } from "react";
+import { useAuth } from '../context/AuthContext';
+
 
 
 const opcionesEquipo = [
@@ -30,6 +32,9 @@ const opcionesUbicacion = [
 const opcionesMovimiento = ["Ingreso", "Salida"];
 
 export const Formulario = () => {
+
+    const { user } = useAuth();
+
     const [data, setData] = useState({
         nombre: "",
         apellido: "",
@@ -78,8 +83,7 @@ export const Formulario = () => {
 
     return (
         <form className="formulario-equipos" onSubmit={handleSubmit}>
-            <TextInput name="nombre" id="input-nombre" value={data.nombre} onChange={handleChange} placeholder="Nombre">Nombre: </TextInput>
-            <TextInput name="apellido" id="input-apellido" value={data.apellido} onChange={handleChange} placeholder="Apellido">Apellido: </TextInput>
+            <label name="usuario" id="input-nombre" value={data.nombre} onChange={handleChange}>Usuario: {user ? user?.user_metadata?.full_name : "Iniciar Sesion"}</label>
             <SelectInput name="equipo" value={data.equipo} onChange={handleChange} opciones={opcionesEquipo}>Equipo: </SelectInput>
             <SelectInput name="ubicacion" value={data.ubicacion} onChange={handleChange} opciones={opcionesUbicacion}>Ubicación: </SelectInput>
             <TextInput name="observacion" id="observacion" value={data.observacion} onChange={handleChange} placeholder="observacion">Observacion: </TextInput>
