@@ -9,11 +9,11 @@ import { AuthProvider } from './context/AuthContext';
 function App() {
   return (
     <AuthProvider>
-      <BrowserRouter>
+      <BrowserRouter basename={import.meta.env.DEV ? '/' : '/CaliddaControlDeEquipos/'}>
         <Navegacion />
         <Routes>
           <Route path="/login" element={<PaginaLogin />} />
-          <Route path="/" element={<Navigate to="/inicio" replace />} />
+          <Route path="/" element={<Navigate to="/login" replace />} />
           <Route path="/inicio" element={<PaginaInicio />} />
           <Route path="/inventario" element={<PaginaInventario />} />
         </Routes>
