@@ -5,6 +5,7 @@ import { BotonFormulario } from "./BotonFormulario";
 import { useState, useContext, useEffect } from "react";
 import { AuthContext } from '../context/AuthContext';
 import { supabase } from '../supabase/supabaseClient';
+import './Formulario.css';
 
 export const Formulario = () => {
     const { user } = useContext(AuthContext);
@@ -135,49 +136,58 @@ export const Formulario = () => {
     }
 
     return (
-        <form className="formulario-equipos" onSubmit={handleSubmit}>
-            <label id="input-nombre">
-                Usuario: {user ? user.user_metadata?.full_name : "No autenticado"}
-            </label>
+        <div className="formulario-container">
+            <form className="formulario-equipos" onSubmit={handleSubmit}>
+                <div className="formulario-header">
+                    <h2 className="formulario-titulo">Registrar Movimiento</h2>
+                </div>
 
-            <SelectInput
-                name="id_equipo"
-                value={data.id_equipo}
-                onChange={handleChange}
-                opciones={equipos.map(eq => ({ value: eq.id_equipo, label: `${eq.tipo_equipo} - ${eq.marca} ${eq.modelo}` }))}
-            >
-                Equipo:
-            </SelectInput>
+                <div className="formulario-usuario-badge">
+                    <span className="usuario-badge-icon" aria-hidden="true">👤</span>
+                    <span id="input-nombre" className="usuario-badge-text">
+                        Usuario: <strong>{user ? user.user_metadata?.full_name : "No autenticado"}</strong>
+                    </span>
+                </div>
 
-            <SelectInput
-                name="id_ubicacion"
-                value={data.id_ubicacion}
-                onChange={handleChange}
-                opciones={opcionesUbicacionDinamicas}
-            >
-                Ubicación:
-            </SelectInput>
+                <SelectInput
+                    name="id_equipo"
+                    value={data.id_equipo}
+                    onChange={handleChange}
+                    opciones={equipos.map(eq => ({ value: eq.id_equipo, label: `${eq.tipo_equipo} - ${eq.marca} ${eq.modelo}` }))}
+                >
+                    Equipo:
+                </SelectInput>
 
-            <TextInput
-                name="observaciones"
-                id="observaciones"
-                value={data.observaciones}
-                onChange={handleChange}
-                placeholder="Observaciones (Opcional)"
-            >
-                Observaciones:
-            </TextInput>
+                <SelectInput
+                    name="id_ubicacion"
+                    value={data.id_ubicacion}
+                    onChange={handleChange}
+                    opciones={opcionesUbicacionDinamicas}
+                >
+                    Ubicación:
+                </SelectInput>
 
-            <RadioButton
-                name="tipo_movimiento"
-                value={data.tipo_movimiento}
-                onChange={handleChange}
-                opciones={opcionesMovimientoDinamicas}
-            >
-                Movimiento:
-            </RadioButton>
+                <TextInput
+                    name="observaciones"
+                    id="observaciones"
+                    value={data.observaciones}
+                    onChange={handleChange}
+                    placeholder="Observaciones (Opcional)"
+                >
+                    Observaciones:
+                </TextInput>
 
-            <BotonFormulario className="boton-formulario">Registrar Movimiento</BotonFormulario>
-        </form>
+                <RadioButton
+                    name="tipo_movimiento"
+                    value={data.tipo_movimiento}
+                    onChange={handleChange}
+                    opciones={opcionesMovimientoDinamicas}
+                >
+                    Movimiento:
+                </RadioButton>
+
+                <BotonFormulario className="boton-formulario">Registrar Movimiento</BotonFormulario>
+            </form>
+        </div>
     );
 };

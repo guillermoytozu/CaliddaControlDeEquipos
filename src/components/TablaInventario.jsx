@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "../supabase/supabaseClient";
+import './TablaInventario.css';
 
 export const TablaInventario = () => {
     const [equipos, setEquipos] = useState([]);
@@ -36,61 +37,71 @@ export const TablaInventario = () => {
     }, []);
 
     return (
-        <section id="seccion-lista">
-            <h2>Inventario general</h2>
-            <table id="tabla-lista-equipos">
-                <thead>
-                    <tr>
-                        <th>Equipo</th>
-                        <th>Disponibilidad</th>
-                        <th>Ubicación</th>
-                        <th>Usuario actual</th>
-                    </tr>
-                </thead>
-                <tbody id="cuerpo-tabla-equipos">
+        <section id="seccion-lista" className="seccion-tabla-inventario">
+            <div className="tabla-header-area">
+                <h2 className="tabla-titulo">Inventario General</h2>
+                <p className="tabla-subtitulo">Estado y asignación de todos los equipos registrados</p>
+            </div>
 
-                    {cargando ? (
+            <div className="tabla-scroll-hint" aria-hidden="true">
+                <span>⟷ Desliza horizontalmente para ver más</span>
+            </div>
+
+            <div className="tabla-responsive-container">
+                <table id="tabla-lista-equipos" className="tabla-datos">
+                    <thead>
                         <tr>
-                            <td colSpan="4" style={{ textAlign: "center" }}>Cargando inventario...</td>
+                            <th>Equipo</th>
+                            <th>Disponibilidad</th>
+                            <th>Ubicación</th>
+                            <th>Usuario actual</th>
                         </tr>
-                    ) : equipos.length === 0 ? (
-                        <tr>
-                            <td colSpan="4" style={{ textAlign: "center" }}>No hay equipos registrados</td>
-                        </tr>
-                    ) : (
-                        equipos.map((equipo) => {
-                            // Si está disponible, mostramos ubicación. Si no, mostramos "-"
-                            const nombreUbicacion = equipo.disponibilidad
-                                ? (equipo.ubicaciones?.ubicacion || "Sin ubicación asignada")
-                                : "-";
+                    </thead>
+                    <tbody id="cuerpo-tabla-equipos">
 
-                            // Si NO está disponible, mostramos quién lo tiene. Si está almacenado, mostramos "-"
-                            const nombreUsuario = !equipo.disponibilidad
-                                ? (equipo.persona?.nombre || "Usuario desconocido")
-                                : "-";
+                        {cargando ? (
+                            <tr>
+                                <td colSpan="4" className="tabla-mensaje-estado">Cargando inventario...</td>
+                            </tr>
+                        ) : equipos.length === 0 ? (
+                            <tr>
+                                <td colSpan="4" className="tabla-mensaje-estado">No hay equipos registrados</td>
+                            </tr>
+                        ) : (
+                            equipos.map((equipo) => {
+                                // Si está disponible, mostramos ubicación. Si no, mostramos "-"
+                                const nombreUbicacion = equipo.disponibilidad
+                                    ? (equipo.ubicaciones?.ubicacion || "Sin ubicación asignada")
+                                    : "-";
 
-                            return (
-                                <tr key={equipo.id_equipo}>
-                                    <td>{equipo.tipo_equipo} - {equipo.marca} {equipo.modelo}</td>
+                                // Si NO está disponible, mostramos quién lo tiene. Si está almacenado, mostramos "-"
+                                const nombreUsuario = !equipo.disponibilidad
+                                    ? (equipo.persona?.nombre || "Usuario desconocido")
+                                    : "-";
 
-                                    <td>
-                                        <span style={{
-                                            color: equipo.disponibilidad ? "var(--color-verde)" : "var(--color-rojo)",
-                                            fontWeight: "bold"
-                                        }}>
-                                            {equipo.disponibilidad ? "Disponible" : "En uso"}
-                                        </span>
-                                    </td>
+                                const estaDisponible = equipo.disponibilidad;
 
-                                    <td>{nombreUbicacion}</td>
-                                    <td>{nombreUsuario}</td>
-                                </tr>
-                            );
-                        })
-                    )}
+                                return (
+                                    <tr key={equipo.id_equipo}>
+                                        <td><strong>{equipo.tipo_equipo}</strong> - {equipo.marca} {equipo.modelo}</td>
 
-                </tbody>
-            </table>
+                                        <td>
+                                            <span className={`badge-disponibilidad ${estaDisponible ? 'disponible' : 'en-uso'}`}>
+                                                <span className="badge-dot" aria-hidden="true"></span>
+                                                {estaDisponible ? "Disponible" : "En uso"}
+                                            </span>
+                                        </td>
+
+                                        <td>{nombreUbicacion}</td>
+                                        <td>{nombreUsuario}</td>
+                                    </tr>
+                                );
+                            })
+                        )}
+
+                    </tbody>
+                </table>
+            </div>
         </section>
     );
 };

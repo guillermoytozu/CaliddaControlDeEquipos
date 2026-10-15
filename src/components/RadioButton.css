@@ -1,0 +1,90 @@
+/* RadioButton - Mobile First */
+.radio-group-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    width: 100%;
+    text-align: left;
+}
+
+.titulo-grupo {
+    font-size: 0.92rem;
+    font-weight: 600;
+    color: var(--color-texto);
+}
+
+.radio-button {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 0.6rem;
+    width: 100%;
+}
+
+.radio-card {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    min-height: 44px;
+    padding: 0.65rem 0.9rem;
+    background-color: #ffffff;
+    border: 1.5px solid var(--color-gris-4);
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    user-select: none;
+    transition: all var(--transition-fast);
+}
+
+.radio-card:hover {
+    border-color: var(--color-calidda-hover);
+    background-color: var(--color-gris-5);
+}
+
+.radio-card.seleccionado {
+    border-color: var(--color-calidda);
+    background-color: var(--color-calidda-light);
+    box-shadow: 0 0 0 2px rgba(0, 161, 222, 0.15);
+}
+
+.radio-input-native {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.radio-custom-indicator {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    border: 2px solid var(--color-gris-3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all var(--transition-fast);
+}
+
+.radio-card.seleccionado .radio-custom-indicator {
+    border-color: var(--color-calidda);
+    background-color: var(--color-calidda);
+}
+
+.radio-card.seleccionado .radio-custom-indicator::after {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: #ffffff;
+}
+
+.radio-label-text {
+    font-size: 0.92rem;
+    font-weight: 500;
+    color: var(--color-texto);
+}
+
+.radio-card.seleccionado .radio-label-text {
+    font-weight: 700;
+    color: var(--color-calidda-dark);
+}

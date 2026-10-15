@@ -1,14 +1,26 @@
-import { Link } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
+import './Navegacion.css';
 
 export const Navegacion = () => {
     return (
-        <nav>
+        <nav className="navegacion-principal">
             <ul className="lista-Nav">
-                {/* Cambiamos <a> por <Link> y href por to */}
-                <li><Link id="Link-login" to="/login">Login</Link></li>
-                <li><Link id="Link-inicio" to="/inicio">Inicio</Link></li>
-                <li><Link id="Link-fotos" to="/inventario">Inventario</Link></li>
+                <li>
+                    <NavLink id="Link-login" to="/login" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
+                        Login
+                    </NavLink>
+                </li>
+                <li>
+                    <NavLink id="Link-inicio" to="/inicio" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
+                        Inicio
+                    </NavLink>
+                </li>
+                <li>
+                    <NavLink id="Link-fotos" to="/inventario" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
+                        Inventario
+                    </NavLink>
+                </li>
             </ul>
         </nav>
     );
-}
+};

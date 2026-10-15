@@ -6,25 +6,32 @@ import { PaginaInventario } from './pages/PaginaInventario';
 import { PaginaLogin } from './pages/paginaLogin';
 import { AuthProvider } from './context/AuthContext';
 import logoCalidda from './IMG/logo.png';
+import './App.css';
 
 function App() {
   return (
     <AuthProvider>
       <BrowserRouter basename={import.meta.env.DEV ? '/' : '/CaliddaControlDeEquipos/'}>
-        <header id="header">
-          <img src={logoCalidda} />
-          <h1 id="titulo">CONTROL DE EQUIPOS <br /> CÁLIDDA</h1>
-        </header>
-        <Navegacion />
-        <Routes>
-          <Route path="/login" element={<PaginaLogin />} />
-          <Route path="/" element={<Navigate to="/login" replace />} />
-          <Route path="/inicio" element={<PaginaInicio />} />
-          <Route path="/inventario" element={<PaginaInventario />} />
-        </Routes>
-        <Footer año="2026">
-          Calidda - Derechos reservados
-        </Footer>
+        <div className="app-container">
+          <header id="header" className="app-header">
+            <div className="header-content">
+              <img src={logoCalidda} alt="Logo Cálidda" className="header-logo" />
+              <h1 id="titulo" className="header-titulo">CONTROL DE EQUIPOS <br /> CÁLIDDA</h1>
+            </div>
+          </header>
+          <Navegacion />
+          <main className="app-main-content">
+            <Routes>
+              <Route path="/login" element={<PaginaLogin />} />
+              <Route path="/" element={<Navigate to="/login" replace />} />
+              <Route path="/inicio" element={<PaginaInicio />} />
+              <Route path="/inventario" element={<PaginaInventario />} />
+            </Routes>
+          </main>
+          <Footer año="2026">
+            Calidda - Derechos reservados
+          </Footer>
+        </div>
       </BrowserRouter>
     </AuthProvider>
   );

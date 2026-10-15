@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from '../supabase/supabaseClient';
+import './TablaMovimientos.css';
 
 export const TablaMovimientos = () => {
     const [movimientos, setMovimientos] = useState([]);
@@ -38,56 +39,71 @@ export const TablaMovimientos = () => {
     }, []);
 
     return (
-        <section id="seccion-lista">
-            <h2>Trazabilidad de equipos</h2>
-            <table id="tabla-lista-equipos">
-                <thead>
-                    <tr>
-                        <th>Usuario</th>
-                        <th>Equipo</th>
-                        <th>Ubicación</th>
-                        <th>Movimiento</th>
-                        <th>Fecha</th>
-                        <th>Hora</th>
-                    </tr>
-                </thead>
-                <tbody id="cuerpo-tabla-equipos">
+        <section id="seccion-lista" className="seccion-tabla-movimientos">
+            <div className="tabla-header-area">
+                <h2 className="tabla-titulo">Trazabilidad de equipos</h2>
+                <p className="tabla-subtitulo">Historial completo de salidas e ingresos de equipos</p>
+            </div>
 
-                    {cargando && (
-                        <tr><td colSpan="6" style={{ textAlign: 'center' }}>Cargando lista...</td></tr>
-                    )}
+            <div className="tabla-scroll-hint" aria-hidden="true">
+                <span>⟷ Desliza horizontalmente para ver más</span>
+            </div>
 
-                    {error && (
-                        <tr><td colSpan="6" style={{ textAlign: 'center', color: 'red' }}>Error al cargar la lista.</td></tr>
-                    )}
+            <div className="tabla-responsive-container">
+                <table id="tabla-lista-equipos" className="tabla-datos">
+                    <thead>
+                        <tr>
+                            <th>Usuario</th>
+                            <th>Equipo</th>
+                            <th>Ubicación</th>
+                            <th>Movimiento</th>
+                            <th>Fecha</th>
+                            <th>Hora</th>
+                        </tr>
+                    </thead>
+                    <tbody id="cuerpo-tabla-equipos">
 
-                    {!cargando && !error && movimientos.map((dato) => {
-                        // Formateo de fecha y hora a partir del campo fecha_hora de Supabase
-                        const fechaObj = new Date(dato.fecha_hora);
-                        const fechaYHora = fechaObj.toLocaleString("es-PE", { hour12: false });
-                        const fecha = fechaYHora.split(',')[0];
-                        const hora = fechaYHora.split(',')[1]?.trim().slice(0, 5) || "";
+                        {cargando && (
+                            <tr><td colSpan="6" className="tabla-mensaje-estado">Cargando lista...</td></tr>
+                        )}
 
-                        // Construimos el string del equipo concatenando marca y modelo
-                        const equipoString = dato.inventarioequipos
-                            ? `${dato.inventarioequipos.tipo_equipo} - ${dato.inventarioequipos.marca} ${dato.inventarioequipos.modelo}`
-                            : "Equipo no encontrado";
+                        {error && (
+                            <tr><td colSpan="6" className="tabla-mensaje-error">Error al cargar la lista.</td></tr>
+                        )}
 
-                        return (
-                            // Usamos el id_movimiento real como key de React
-                            <tr key={dato.id_movimiento}>
-                                <td>{dato.persona?.nombre || "Usuario desconocido"}</td>
-                                <td>{equipoString}</td>
-                                <td>{dato.ubicaciones?.ubicacion || "Ubicación desconocida"}</td>
-                                <td>{dato.tipo_movimiento}</td>
-                                <td>{fecha}</td>
-                                <td>{hora}</td>
-                            </tr>
-                        );
-                    })}
+                        {!cargando && !error && movimientos.map((dato) => {
+                            // Formateo de fecha y hora a partir del campo fecha_hora de Supabase
+                            const fechaObj = new Date(dato.fecha_hora);
+                            const fechaYHora = fechaObj.toLocaleString("es-PE", { hour12: false });
+                            const fecha = fechaYHora.split(',')[0];
+                            const hora = fechaYHora.split(',')[1]?.trim().slice(0, 5) || "";
 
-                </tbody>
-            </table>
+                            // Construimos el string del equipo concatenando marca y modelo
+                            const equipoString = dato.inventarioequipos
+                                ? `${dato.inventarioequipos.tipo_equipo} - ${dato.inventarioequipos.marca} ${dato.inventarioequipos.modelo}`
+                                : "Equipo no encontrado";
+
+                            const claseMovimiento = dato.tipo_movimiento?.toLowerCase() === 'salida' ? 'salida' : 'ingreso';
+
+                            return (
+                                <tr key={dato.id_movimiento}>
+                                    <td><strong>{dato.persona?.nombre || "Usuario desconocido"}</strong></td>
+                                    <td>{equipoString}</td>
+                                    <td>{dato.ubicaciones?.ubicacion || "Ubicación desconocida"}</td>
+                                    <td>
+                                        <span className={`badge-movimiento ${claseMovimiento}`}>
+                                            {dato.tipo_movimiento}
+                                        </span>
+                                    </td>
+                                    <td>{fecha}</td>
+                                    <td>{hora}</td>
+                                </tr>
+                            );
+                        })}
+
+                    </tbody>
+                </table>
+            </div>
         </section>
     );
-}
+};

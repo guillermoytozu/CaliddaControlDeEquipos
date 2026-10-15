@@ -1,0 +1,151 @@
+/* TablaInventario - Mobile First */
+.seccion-tabla-inventario {
+    width: 100%;
+    margin: 1.5rem auto 2rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.tabla-header-area {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    margin-bottom: 0.75rem;
+    text-align: left;
+}
+
+.tabla-titulo {
+    font-size: clamp(1.15rem, 3.5vw, 1.45rem);
+    font-weight: 700;
+    color: var(--color-texto);
+    margin: 0;
+}
+
+.tabla-subtitulo {
+    font-size: 0.85rem;
+    color: var(--color-texto-muted);
+    margin: 0;
+}
+
+.tabla-scroll-hint {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    font-size: 0.78rem;
+    color: var(--color-calidda-dark);
+    margin-bottom: 0.4rem;
+    font-weight: 600;
+}
+
+.tabla-responsive-container {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    background: #ffffff;
+    border-radius: var(--border-radius);
+    border: 1px solid var(--color-gris-4);
+    box-shadow: var(--shadow-sm);
+}
+
+.tabla-datos {
+    width: 100%;
+    min-width: 580px;
+    border-collapse: collapse;
+    text-align: left;
+    font-size: 0.88rem;
+}
+
+.tabla-datos th {
+    background-color: var(--color-gris-5);
+    color: #475569;
+    font-weight: 700;
+    padding: 0.85rem 1rem;
+    border-bottom: 2px solid var(--color-gris-4);
+    white-space: nowrap;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.tabla-datos td {
+    padding: 0.85rem 1rem;
+    border-bottom: 1px solid var(--color-gris-4);
+    color: var(--color-texto);
+    vertical-align: middle;
+}
+
+.tabla-datos tbody tr:nth-child(even) {
+    background-color: #fafbfc;
+}
+
+.tabla-datos tbody tr:hover {
+    background-color: #f1f8fc;
+    transition: background-color var(--transition-fast);
+}
+
+.tabla-datos tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.tabla-mensaje-estado {
+    text-align: center;
+    padding: 2rem 1rem;
+    color: var(--color-texto-muted);
+    font-weight: 500;
+}
+
+/* Badges de Disponibilidad */
+.badge-disponibilidad {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.25rem 0.75rem;
+    border-radius: var(--border-radius-full);
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+}
+
+.badge-disponibilidad.disponible {
+    background-color: #dcfce7;
+    color: #15803d;
+    border: 1px solid #86efac;
+}
+
+.badge-disponibilidad.en-uso {
+    background-color: #fee2e2;
+    color: #b91c1c;
+    border: 1px solid #fca5a5;
+}
+
+.badge-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background-color: currentColor;
+    display: inline-block;
+}
+
+/* Tablet y Desktop */
+@media (min-width: 768px) {
+    .seccion-tabla-inventario {
+        margin: 2rem auto 3rem;
+    }
+
+    .tabla-scroll-hint {
+        display: none;
+    }
+
+    .tabla-datos {
+        font-size: 0.92rem;
+    }
+
+    .tabla-datos th {
+        font-size: 0.82rem;
+        padding: 0.95rem 1.15rem;
+    }
+
+    .tabla-datos td {
+        padding: 0.95rem 1.15rem;
+    }
+}

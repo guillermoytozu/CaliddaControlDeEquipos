@@ -1,12 +1,11 @@
-import { useState } from "react";
+import './BotonFormulario.css';
 
-export const BotonFormulario = ({ children, className }) => {
-
+export const BotonFormulario = ({ children, className = '' }) => {
     return (
         <button
             type="submit"
-            className={className}>
+            className={`boton-formulario ${className}`.trim()}>
             {children}
         </button>
     );
-}
+};

@@ -1,37 +1,41 @@
+import './RadioButton.css';
+
 export const RadioButton = ({ children, name, value, onChange, opciones }) => {
     return (
-        <>
+        <div className="radio-group-container">
             <span className="titulo-grupo">{children}</span>
 
             <div className="radio-button">
                 {opciones.map((opcion, index) => {
                     const idUnico = `${name}-${index}`;
-
-                    // 1. Detectamos si la opción es un objeto o un string simple
                     const esObjeto = typeof opcion === 'object' && opcion !== null;
                     const valorOpcion = esObjeto ? opcion.value : opcion;
                     const etiquetaOpcion = esObjeto ? opcion.label : opcion;
+                    const isChecked = value === valorOpcion;
 
                     return (
-                        <div key={index}>
+                        <label
+                            key={index}
+                            htmlFor={idUnico}
+                            className={`radio-card ${isChecked ? 'seleccionado' : ''}`}
+                        >
                             <input
                                 type="radio"
                                 id={idUnico}
                                 name={name}
-                                // 2. Usamos el valor extraído
                                 value={valorOpcion}
-                                // 3. Comparamos contra el valor extraído
-                                checked={value === valorOpcion}
+                                checked={isChecked}
                                 onChange={onChange}
+                                className="radio-input-native"
                             />
-                            <label htmlFor={idUnico}>
-                                {/* 4. Mostramos la etiqueta extraída */}
+                            <span className="radio-custom-indicator"></span>
+                            <span className="radio-label-text">
                                 {etiquetaOpcion}
-                            </label>
-                        </div>
+                            </span>
+                        </label>
                     );
                 })}
             </div>
-        </>
+        </div>
     );
-}
+};

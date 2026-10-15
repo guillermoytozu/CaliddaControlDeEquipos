@@ -1,0 +1,46 @@
+/* Footer - Mobile First */
+.app-footer {
+    background: var(--linear-gradient-vertical-1);
+    color: #ffffff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border-top: 3px solid var(--color-calidda);
+    margin-top: auto;
+    padding: 1.25rem 1rem;
+    gap: 0.25rem;
+    text-align: center;
+    width: 100%;
+}
+
+.footer-texto {
+    font-size: 0.85rem;
+    color: #ffffff;
+    opacity: 0.95;
+    margin: 0;
+}
+
+.footer-year {
+    font-size: 0.8rem;
+    color: #ffffff;
+    opacity: 0.8;
+    margin: 0;
+    font-weight: 500;
+}
+
+@media (min-width: 640px) {
+    .app-footer {
+        flex-direction: row;
+        gap: 1.5rem;
+        padding: 1.25rem 2rem;
+    }
+
+    .footer-texto {
+        font-size: 0.9rem;
+    }
+
+    .footer-year {
+        font-size: 0.9rem;
+    }
+}
