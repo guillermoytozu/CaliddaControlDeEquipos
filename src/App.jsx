@@ -11,7 +11,7 @@ import './App.css';
 function App() {
   return (
     <AuthProvider>
-      <BrowserRouter basename={import.meta.env.DEV ? '/' : '/CaliddaControlDeEquipos/'}>
+      <BrowserRouter basename={import.meta.env.BASE_URL}>
         <div className="app-container">
           <header id="header" className="app-header">
             <div className="header-content">
