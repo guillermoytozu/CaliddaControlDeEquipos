@@ -1,20 +1,22 @@
-import { useAuth } from '../context/AuthContext'; // 1. Importas tu hook personalizado
 import { supabase } from '../supabase/supabaseClient';
 import { useNavigate } from 'react-router-dom';
+import { useContext } from 'react';
+import { AuthContext } from '../context/AuthContext';
 import './paginaLogin.css';
 
 export const PaginaLogin = () => {
-    // 2. Extraes el usuario directamente del contexto global
-    const { user } = useAuth();
-    const navigate = useNavigate();
 
-    // (Eliminamos por completo el useState y el useEffect que tenías antes)
+    const { user } = useContext(AuthContext);
+    const navigate = useNavigate();
 
     const signInWithGoogle = async () => {
         const { error } = await supabase.auth.signInWithOAuth({
             provider: 'google',
             options: {
-                redirectTo: window.location.origin + "/inicio"
+                redirectTo: window.location.origin + "/inicio",
+                queryParams: {
+                    prompt: 'select_account'
+                }
             }
         });
 
@@ -34,11 +36,9 @@ export const PaginaLogin = () => {
                         <h3>Bienvenido, {user.user_metadata?.full_name}</h3>
                         <img src={user.user_metadata?.avatar_url} alt="Avatar" className="avatar-img" />
 
-                        {/* Nota: si en auth.users no estás guardando el email, esto podría estar vacío. 
-                            Google sí devuelve el email en la metadata a veces, o en user.email */}
                         <p>{user.email}</p>
 
-                        <button onClick={() => navigate('/inicio')} className="btn-primary">Ir al Sistema</button>
+                        <button onClick={() => navigate('/inicio')} className="btn-primary">Ir al Inicio</button>
                         <button onClick={signOut} className="btn-logout">Cerrar Sesión</button>
                     </div>
                 ) : (

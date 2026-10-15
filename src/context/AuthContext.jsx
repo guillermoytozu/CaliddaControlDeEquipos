@@ -1,22 +1,29 @@
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useEffect, useState } from 'react';
 import { supabase } from '../supabase/supabaseClient';
 
 // 1. Creamos el contexto
-const AuthContext = createContext({});
+export const AuthContext = createContext({});
 
 // 2. Creamos el proveedor que envolverá la app
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
-    const [loading, setLoading] = useState(true); // Para evitar parpadeos al cargar
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        // Obtener sesión actual
-        supabase.auth.getSession().then(({ data: { session } }) => {
-            setUser(session?.user || null);
-            setLoading(false);
-        });
+        const verificarSesion = async () => {
+            try {
+                const { data: { session }, error } = await supabase.auth.getSession();
+                if (error) throw error;
+                setUser(session?.user || null);
+            } catch (error) {
+                console.error("Hubo un error al buscar la sesión:", error.message);
+            } finally {
+                setLoading(false);
+            }
+        };
 
-        // Escuchar cambios
+        verificarSesion();
+
         const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
             setUser(session?.user || null);
             setLoading(false);
@@ -30,9 +37,4 @@ export const AuthProvider = ({ children }) => {
             {!loading && children}
         </AuthContext.Provider>
     );
-};
-
-// 3. Hook personalizado para usar el contexto fácilmente
-export const useAuth = () => {
-    return useContext(AuthContext);
 };

@@ -1,22 +1,34 @@
 import { useState, useEffect } from "react";
+import { supabase } from '../supabase/supabaseClient';
 
 export const TablaMovimientos = () => {
-    const [equipos, setEquipos] = useState([]);
+    const [movimientos, setMovimientos] = useState([]);
     const [cargando, setCargando] = useState(true);
     const [error, setError] = useState(false);
 
     useEffect(() => {
         const cargarDatos = async () => {
-            const urlAPI = "https://script.google.com/macros/s/AKfycbxxC475VDMbyw74GbWqLYm8x2FIFPi-OuQujPDO59VR9EcIz3LH8ZH52MwKgARGvsJ9/exec";
-
             try {
-                const respuesta = await fetch(urlAPI);
-                const datos = await respuesta.json();
+                // Hacemos un JOIN con las tablas relacionadas usando la sintaxis de Supabase
+                const { data, error } = await supabase
+                    .from('movimientos')
+                    .select(`
+                        id_movimiento,
+                        tipo_movimiento,
+                        fecha_hora,
+                        persona ( nombre ),
+                        inventarioequipos ( tipo_equipo, marca, modelo ),
+                        ubicaciones ( ubicacion )
+                    `)
+                    // Ordenamos para que los movimientos más recientes salgan primero
+                    .order('fecha_hora', { ascending: false });
 
-                setEquipos(datos);
+                if (error) throw error;
+
+                setMovimientos(data);
                 setCargando(false);
             } catch (err) {
-                console.error("Error al cargar los datos:", err);
+                console.error("Error al cargar los datos de Supabase:", err.message);
                 setError(true);
                 setCargando(false);
             }
@@ -31,8 +43,7 @@ export const TablaMovimientos = () => {
             <table id="tabla-lista-equipos">
                 <thead>
                     <tr>
-                        <th>Nombre</th>
-                        <th>Apellido</th>
+                        <th>Usuario</th>
                         <th>Equipo</th>
                         <th>Ubicación</th>
                         <th>Movimiento</th>
@@ -43,26 +54,32 @@ export const TablaMovimientos = () => {
                 <tbody id="cuerpo-tabla-equipos">
 
                     {cargando && (
-                        <tr><td colSpan="7" style={{ textAlign: 'center' }}>Cargando lista...</td></tr>
+                        <tr><td colSpan="6" style={{ textAlign: 'center' }}>Cargando lista...</td></tr>
                     )}
 
                     {error && (
-                        <tr><td colSpan="7" style={{ textAlign: 'center', color: 'red' }}>Error al cargar la lista.</td></tr>
+                        <tr><td colSpan="6" style={{ textAlign: 'center', color: 'red' }}>Error al cargar la lista.</td></tr>
                     )}
 
-                    {!cargando && !error && equipos.map((dato, index) => {
-
-                        const fechaYHora = new Date(dato.date).toLocaleString("es-PE", { hour12: false });
+                    {!cargando && !error && movimientos.map((dato) => {
+                        // Formateo de fecha y hora a partir del campo fecha_hora de Supabase
+                        const fechaObj = new Date(dato.fecha_hora);
+                        const fechaYHora = fechaObj.toLocaleString("es-PE", { hour12: false });
                         const fecha = fechaYHora.split(',')[0];
-                        const hora = fechaYHora.split(',')[1].trim().slice(0, 5);
+                        const hora = fechaYHora.split(',')[1]?.trim().slice(0, 5) || "";
+
+                        // Construimos el string del equipo concatenando marca y modelo
+                        const equipoString = dato.inventarioequipos
+                            ? `${dato.inventarioequipos.tipo_equipo} - ${dato.inventarioequipos.marca} ${dato.inventarioequipos.modelo}`
+                            : "Equipo no encontrado";
 
                         return (
-                            <tr key={index}>
-                                <td>{dato.nombre}</td>
-                                <td>{dato.apellido}</td>
-                                <td>{dato.equipo}</td>
-                                <td>{dato.ubicacion}</td>
-                                <td>{dato.movimiento}</td>
+                            // Usamos el id_movimiento real como key de React
+                            <tr key={dato.id_movimiento}>
+                                <td>{dato.persona?.nombre || "Usuario desconocido"}</td>
+                                <td>{equipoString}</td>
+                                <td>{dato.ubicaciones?.ubicacion || "Ubicación desconocida"}</td>
+                                <td>{dato.tipo_movimiento}</td>
                                 <td>{fecha}</td>
                                 <td>{hora}</td>
                             </tr>

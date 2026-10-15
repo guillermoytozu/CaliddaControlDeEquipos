@@ -8,16 +8,24 @@ export const TablaInventario = () => {
     useEffect(() => {
         const obtenerInventario = async () => {
             try {
+                // Consulta optimizada: Traemos directamente la ubicación y la persona actual
                 const { data, error } = await supabase
                     .from("inventarioequipos")
-                    .select("*")
+                    .select(`
+                        id_equipo,
+                        tipo_equipo,
+                        marca,
+                        modelo,
+                        disponibilidad,
+                        ubicaciones ( ubicacion ),
+                        persona ( nombre )
+                    `)
                     .order("id_equipo", { ascending: true });
 
                 if (error) throw error;
 
-                if (data) {
-                    setEquipos(data);
-                }
+                if (data) setEquipos(data);
+
             } catch (error) {
                 console.error("Error al obtener los equipos:", error.message);
             } finally {
@@ -27,56 +35,62 @@ export const TablaInventario = () => {
         obtenerInventario();
     }, []);
 
-
     return (
         <section id="seccion-lista">
-            <h2>Trazabilidad de equipos</h2>
+            <h2>Inventario general</h2>
             <table id="tabla-lista-equipos">
                 <thead>
                     <tr>
                         <th>Equipo</th>
                         <th>Disponibilidad</th>
                         <th>Ubicación</th>
-                        <th>Nombre</th>
-                        <th>Apellido</th>
+                        <th>Usuario actual</th>
                     </tr>
                 </thead>
                 <tbody id="cuerpo-tabla-equipos">
 
                     {cargando ? (
                         <tr>
-                            <td colSpan="5" style={{ textAlign: "center" }}>Cargando inventario...</td>
+                            <td colSpan="4" style={{ textAlign: "center" }}>Cargando inventario...</td>
                         </tr>
                     ) : equipos.length === 0 ? (
                         <tr>
-                            <td colSpan="5" style={{ textAlign: "center" }}>No hay equipos registrados</td>
+                            <td colSpan="4" style={{ textAlign: "center" }}>No hay equipos registrados</td>
                         </tr>
                     ) : (
-                        equipos.map((equipo) => (
-                            <tr key={equipo.id_equipo}>
-                                {/* Concatenamos el tipo, marca y modelo */}
-                                <td> {equipo.marca} {equipo.modelo}</td>
+                        equipos.map((equipo) => {
+                            // Si está disponible, mostramos ubicación. Si no, mostramos "-"
+                            const nombreUbicacion = equipo.disponibilidad
+                                ? (equipo.ubicaciones?.ubicacion || "Sin ubicación asignada")
+                                : "-";
 
-                                {/* Transformamos el valor booleano TRUE/FALSE en texto */}
-                                <td>
-                                    <span style={{
-                                        color: equipo.disponibilidad ? "var(--color-verde)" : "var(--color-rojo)",
-                                        fontWeight: "bold"
-                                    }}>
-                                        {equipo.disponibilidad ? "Disponible" : "Alguien más lo tiene"}
-                                    </span>
-                                </td>
+                            // Si NO está disponible, mostramos quién lo tiene. Si está almacenado, mostramos "-"
+                            const nombreUsuario = !equipo.disponibilidad
+                                ? (equipo.persona?.nombre || "Usuario desconocido")
+                                : "-";
 
-                                {/* Dejamos estos campos con un guion ya que no vienen de esta tabla específica */}
-                                <td>-</td>
-                                <td>-</td>
-                                <td>-</td>
-                            </tr>
-                        ))
+                            return (
+                                <tr key={equipo.id_equipo}>
+                                    <td>{equipo.tipo_equipo} - {equipo.marca} {equipo.modelo}</td>
+
+                                    <td>
+                                        <span style={{
+                                            color: equipo.disponibilidad ? "var(--color-verde)" : "var(--color-rojo)",
+                                            fontWeight: "bold"
+                                        }}>
+                                            {equipo.disponibilidad ? "Disponible" : "En uso"}
+                                        </span>
+                                    </td>
+
+                                    <td>{nombreUbicacion}</td>
+                                    <td>{nombreUsuario}</td>
+                                </tr>
+                            );
+                        })
                     )}
 
                 </tbody>
             </table>
         </section>
     );
-}
+};

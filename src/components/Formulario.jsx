@@ -2,93 +2,182 @@ import { TextInput } from "./TextInput";
 import { SelectInput } from "./SelectInput";
 import { RadioButton } from "./RadioButton";
 import { BotonFormulario } from "./BotonFormulario";
-import { useState } from "react";
-import { useAuth } from '../context/AuthContext';
-
-
-
-const opcionesEquipo = [
-    "Localizador de tuberías - Radiodetection RD8200G",
-    "Detector multigas - MSA Altair 4XR",
-    "Detector láser de metano - Heath Consultants RMLD-CS",
-    "Máquina de electrofusión - Georg Fischer MSA 330",
-    "Prensa estranguladora manual - Reed PES2",
-    "Cortatubos tipo guillotina - Reed HPC4",
-    "Raspador rotativo - Ritmo RTC 160",
-    "Llave Stillson - EGA Master 70154",
-    "Manómetro digital - Keller LEO 2",
-    "Detector de defectos - Tinker & Rasor APS",
-    "Roscadora eléctrica - Ridgid 690-I",
-    "Multímetro industrial - Fluke 28 II Rugged",
-    "Alineador mecánico - Ritmo 63-200"
-];
-const opcionesUbicacion = [
-    "Almacén sótano 5",
-    "Centro de Distribución y Logística Principal (Lurín)",
-    "Base Operativa Norte (San Martín de Porres)",
-    "Unidad Móvil de Emergencias (Vehículo Táctico)",
-    "Laboratorio de Calibración y Mantenimiento"
-];
-const opcionesMovimiento = ["Ingreso", "Salida"];
+import { useState, useContext, useEffect } from "react";
+import { AuthContext } from '../context/AuthContext';
+import { supabase } from '../supabase/supabaseClient';
 
 export const Formulario = () => {
+    const { user } = useContext(AuthContext);
 
-    const { user } = useAuth();
+    const [equipos, setEquipos] = useState([]);
+    const [ubicaciones, setUbicaciones] = useState([]);
 
     const [data, setData] = useState({
-        nombre: "",
-        apellido: "",
-        equipo: opcionesEquipo[0],
-        ubicacion: opcionesUbicacion[0],
-        observacion: "",
-        movimiento: opcionesMovimiento[1]
+        id_equipo: "",
+        id_ubicacion: "",
+        observaciones: "",
+        tipo_movimiento: ""
     });
 
+    useEffect(() => {
+        const fetchData = async () => {
+            const { data: equiposData } = await supabase.from('inventarioequipos').select('*');
+            const { data: ubicacionesData } = await supabase.from('ubicaciones').select('*');
 
+            if (equiposData) setEquipos(equiposData);
+            if (ubicacionesData) setUbicaciones(ubicacionesData);
+        };
+        fetchData();
+    }, []);
 
     const handleChange = (e) => {
-        // Al usar radio buttons, volvemos a leer simplemente name y value
         const { name, value } = e.target;
+        let newData = { ...data, [name]: value };
 
-        setData({
-            ...data,
-            [name]: value
-        });
-    }
+        if (name === "id_equipo") {
+            const equipoSeleccionado = equipos.find(eq => eq.id_equipo.toString() === value);
+            if (equipoSeleccionado) {
+                const esSalida = equipoSeleccionado.disponibilidad;
+                newData.tipo_movimiento = esSalida ? "Salida" : "Ingreso";
+
+                // 1. LÓGICA DE UBICACIÓN AUTO-ASIGNADA
+                if (esSalida) {
+                    // Si el equipo está disponible (Salida), forzamos la ubicación actual del equipo
+                    newData.id_ubicacion = equipoSeleccionado.id_ubicacion ? equipoSeleccionado.id_ubicacion.toString() : "";
+                } else {
+                    // Si el equipo no está disponible (Ingreso), borramos la ubicación para obligar al usuario a elegir
+                    newData.id_ubicacion = "";
+                }
+            }
+        }
+
+        setData(newData);
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        if (data.nombre === "" || data.apellido === "" || data.equipo === "" || data.ubicacion === "") {
-            alert("Faltan datos");
-            console.log("Faltan datos");
-        } else {
-            const urlGoogleAppsScript = "https://script.google.com/macros/s/AKfycbxxC475VDMbyw74GbWqLYm8x2FIFPi-OuQujPDO59VR9EcIz3LH8ZH52MwKgARGvsJ9/exec";
+        if (!user) return alert("Debes iniciar sesión para registrar un movimiento.");
+        if (!data.id_equipo || !data.id_ubicacion || !data.tipo_movimiento) {
+            return alert("Faltan datos obligatorios.");
+        }
 
-            try {
-                await fetch(urlGoogleAppsScript, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(data),
-                    mode: "no-cors"
-                });
-                console.log("Datos enviados correctamente");
+        const equipoActual = equipos.find(eq => eq.id_equipo.toString() === data.id_equipo);
 
-                setData({ nombre: "", apellido: "", equipo: opcionesEquipo[0], ubicacion: opcionesMovimiento[0], movimiento: opcionesMovimiento[1] });
-            } catch (error) {
-                console.error("Error al enviar los datos:", error);
-            }
+        if (equipoActual.disponibilidad === false && data.tipo_movimiento === "Salida") {
+            return alert("Error crítico: No se puede dar salida a un equipo que no está disponible.");
+        }
+        if (equipoActual.disponibilidad === true && data.tipo_movimiento === "Ingreso") {
+            return alert("Error crítico: No se puede ingresar un equipo que ya figura como disponible.");
+        }
+
+        try {
+            const { error: errorInsert } = await supabase
+                .from('movimientos')
+                .insert([{
+                    id_persona: user.id,
+                    id_equipo: parseInt(data.id_equipo),
+                    id_ubicacion: parseInt(data.id_ubicacion),
+                    tipo_movimiento: data.tipo_movimiento,
+                    observaciones: data.observaciones
+                }]);
+
+            if (errorInsert) throw errorInsert;
+
+            const nuevaDisponibilidad = data.tipo_movimiento === "Ingreso" ? true : false;
+
+            // NUEVO: Si es un Ingreso (se devuelve), el id_persona queda en null. 
+            // Si es una Salida (se lo llevan), asignamos el ID del usuario logueado.
+            const idUsuarioActualizado = nuevaDisponibilidad ? null : user.id;
+
+            // B. Actualizar disponibilidad, ubicación y usuario en inventarioequipos
+            const { error: errorUpdate } = await supabase
+                .from('inventarioequipos')
+                .update({
+                    disponibilidad: nuevaDisponibilidad,
+                    id_ubicacion: parseInt(data.id_ubicacion),
+                    id_persona: idUsuarioActualizado
+                })
+                .eq('id_equipo', parseInt(data.id_equipo));
+
+            if (errorUpdate) throw errorUpdate;
+
+            // C. Actualizar estado local
+            setEquipos(equipos.map(eq =>
+                eq.id_equipo.toString() === data.id_equipo
+                    ? { ...eq, disponibilidad: nuevaDisponibilidad, id_ubicacion: parseInt(data.id_ubicacion), id_persona: idUsuarioActualizado }
+                    : eq
+            ));
+
+            alert("Movimiento registrado con éxito.");
+            setData({ ...data, observaciones: "", tipo_movimiento: "", id_equipo: "", id_ubicacion: "" });
+
+        } catch (error) {
+            console.error("Error en la base de datos:", error);
+            alert("Hubo un error al procesar el movimiento.");
         }
     };
 
+    const equipoSeleccionadoInfo = equipos.find(eq => eq.id_equipo.toString() === data.id_equipo);
+
+    const opcionesMovimientoDinamicas = equipoSeleccionadoInfo
+        ? [equipoSeleccionadoInfo.disponibilidad ? "Salida" : "Ingreso"]
+        : ["Ingreso", "Salida"];
+
+    // 4. LÓGICA VISUAL: RESTRINGIR LAS OPCIONES DEL SELECTOR DE UBICACIÓN
+    let opcionesUbicacionDinamicas = ubicaciones.map(ub => ({ value: ub.id_ubicacion, label: ub.ubicacion }));
+
+    if (equipoSeleccionadoInfo && equipoSeleccionadoInfo.disponibilidad) {
+        // Si el equipo va a salir, filtramos las ubicaciones para mostrar ÚNICAMENTE donde se encuentra ahora
+        opcionesUbicacionDinamicas = opcionesUbicacionDinamicas.filter(
+            ub => ub.value === equipoSeleccionadoInfo.id_ubicacion
+        );
+    }
+
     return (
         <form className="formulario-equipos" onSubmit={handleSubmit}>
-            <label name="usuario" id="input-nombre" value={data.nombre} onChange={handleChange}>Usuario: {user ? user?.user_metadata?.full_name : "Iniciar Sesion"}</label>
-            <SelectInput name="equipo" value={data.equipo} onChange={handleChange} opciones={opcionesEquipo}>Equipo: </SelectInput>
-            <SelectInput name="ubicacion" value={data.ubicacion} onChange={handleChange} opciones={opcionesUbicacion}>Ubicación: </SelectInput>
-            <TextInput name="observacion" id="observacion" value={data.observacion} onChange={handleChange} placeholder="observacion">Observacion: </TextInput>
-            <RadioButton name="movimiento" value={data.movimiento} onChange={handleChange} opciones={opcionesMovimiento}>Movimiento: </RadioButton>
-            <BotonFormulario className="boton-formulario">Enviar</BotonFormulario>
+            <label id="input-nombre">
+                Usuario: {user ? user.user_metadata?.full_name : "No autenticado"}
+            </label>
+
+            <SelectInput
+                name="id_equipo"
+                value={data.id_equipo}
+                onChange={handleChange}
+                opciones={equipos.map(eq => ({ value: eq.id_equipo, label: `${eq.tipo_equipo} - ${eq.marca} ${eq.modelo}` }))}
+            >
+                Equipo:
+            </SelectInput>
+
+            <SelectInput
+                name="id_ubicacion"
+                value={data.id_ubicacion}
+                onChange={handleChange}
+                opciones={opcionesUbicacionDinamicas}
+            >
+                Ubicación:
+            </SelectInput>
+
+            <TextInput
+                name="observaciones"
+                id="observaciones"
+                value={data.observaciones}
+                onChange={handleChange}
+                placeholder="Observaciones (Opcional)"
+            >
+                Observaciones:
+            </TextInput>
+
+            <RadioButton
+                name="tipo_movimiento"
+                value={data.tipo_movimiento}
+                onChange={handleChange}
+                opciones={opcionesMovimientoDinamicas}
+            >
+                Movimiento:
+            </RadioButton>
+
+            <BotonFormulario className="boton-formulario">Registrar Movimiento</BotonFormulario>
         </form>
     );
-}
+};
