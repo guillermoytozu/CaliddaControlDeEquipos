@@ -3,14 +3,25 @@ import { supabase } from '../supabase/supabaseClient';
 import './TablaMovimientos.css';
 
 export const TablaMovimientos = () => {
+    // Obtenemos la fecha de hoy en formato YYYY-MM-DD
+    const hoy = new Date().toISOString().split('T')[0];
+
     const [movimientos, setMovimientos] = useState([]);
     const [cargando, setCargando] = useState(true);
     const [error, setError] = useState(false);
 
+    // Estados para el rango de fechas (por defecto: hoy)
+    const [fechaInicio, setFechaInicio] = useState(hoy);
+    const [fechaFin, setFechaFin] = useState(hoy);
+
     useEffect(() => {
         const cargarDatos = async () => {
+            setCargando(true);
             try {
-                // Hacemos un JOIN con las tablas relacionadas usando la sintaxis de Supabase
+                // Ajustamos las horas para abarcar el día completo seleccionado
+                const inicioRango = `${fechaInicio} 00:00:00`;
+                const finRango = `${fechaFin} 23:59:59`;
+
                 const { data, error } = await supabase
                     .from('movimientos')
                     .select(`
@@ -21,7 +32,8 @@ export const TablaMovimientos = () => {
                         inventarioequipos ( tipo_equipo, marca, modelo ),
                         ubicaciones ( ubicacion )
                     `)
-                    // Ordenamos para que los movimientos más recientes salgan primero
+                    .gte('fecha_hora', inicioRango)
+                    .lte('fecha_hora', finRango)
                     .order('fecha_hora', { ascending: false });
 
                 if (error) throw error;
@@ -35,14 +47,44 @@ export const TablaMovimientos = () => {
             }
         };
 
-        cargarDatos();
-    }, []);
+        // Evitar consultas si las fechas están vacías
+        if (fechaInicio && fechaFin) {
+            cargarDatos();
+        }
+    }, [fechaInicio, fechaFin]); // El hook se vuelve a ejecutar cada vez que cambian las fechas
 
     return (
         <section id="seccion-lista" className="seccion-tabla-movimientos">
             <div className="tabla-header-area">
-                <h2 className="tabla-titulo">Trazabilidad de equipos</h2>
-                <p className="tabla-subtitulo">Historial completo de salidas e ingresos de equipos</p>
+                <div className="tabla-titulos-container">
+                    <h2 className="tabla-titulo">Trazabilidad de equipos</h2>
+                    <p className="tabla-subtitulo">Historial completo de salidas e ingresos de equipos</p>
+                </div>
+
+                <div className="tabla-filtros-container">
+                    <div className="filtro-grupo">
+                        <label htmlFor="fecha-inicio">Desde:</label>
+                        <input
+                            type="date"
+                            id="fecha-inicio"
+                            className="input-fecha"
+                            value={fechaInicio}
+                            max={hoy}
+                            onChange={(e) => setFechaInicio(e.target.value)}
+                        />
+                    </div>
+                    <div className="filtro-grupo">
+                        <label htmlFor="fecha-fin">Hasta:</label>
+                        <input
+                            type="date"
+                            id="fecha-fin"
+                            className="input-fecha"
+                            value={fechaFin}
+                            max={hoy}
+                            onChange={(e) => setFechaFin(e.target.value)}
+                        />
+                    </div>
+                </div>
             </div>
 
             <div className="tabla-responsive-container">
@@ -60,23 +102,25 @@ export const TablaMovimientos = () => {
                     <tbody id="cuerpo-tabla-equipos">
 
                         {cargando && (
-                            <tr><td colSpan="6" className="tabla-mensaje-estado">Cargando lista...</td></tr>
+                            <tr><td colSpan="6" className="tabla-mensaje-estado">Cargando movimientos...</td></tr>
                         )}
 
-                        {error && (
+                        {error && !cargando && (
                             <tr><td colSpan="6" className="tabla-mensaje-error">Error al cargar la lista.</td></tr>
                         )}
 
+                        {!cargando && !error && movimientos.length === 0 && (
+                            <tr><td colSpan="6" className="tabla-mensaje-estado">No se encontraron movimientos en este rango de fechas.</td></tr>
+                        )}
+
                         {!cargando && !error && movimientos.map((dato) => {
-                            // Formateo de fecha y hora a partir del campo fecha_hora de Supabase
                             const fechaObj = new Date(dato.fecha_hora);
                             const fechaYHora = fechaObj.toLocaleString("es-PE", { hour12: false });
                             const fecha = fechaYHora.split(',')[0];
                             const hora = fechaYHora.split(',')[1]?.trim().slice(0, 5) || "";
 
-                            // Construimos el string del equipo concatenando marca y modelo
                             const equipoString = dato.inventarioequipos
-                                ? `${dato.inventarioequipos.tipo_equipo} - ${dato.inventarioequipos.marca} ${dato.inventarioequipos.modelo}`
+                                ? `${dato.inventarioequipos.tipo_equipo} ${dato.inventarioequipos.marca} ${dato.inventarioequipos.modelo}`
                                 : "Equipo no encontrado";
 
                             const claseMovimiento = dato.tipo_movimiento?.toLowerCase() === 'salida' ? 'salida' : 'ingreso';

@@ -35,18 +35,21 @@ export const Formulario = () => {
         const { name, value } = e.target;
         let newData = { ...data, [name]: value };
 
+        // 1. Si el usuario cambia el tipo de movimiento, limpiamos el equipo y la ubicación seleccionados
+        if (name === "tipo_movimiento") {
+            newData.id_equipo = "";
+            newData.id_ubicacion = "";
+        }
+
+        // 2. Si el usuario selecciona un equipo
         if (name === "id_equipo") {
             const equipoSeleccionado = equipos.find(eq => eq.id_equipo.toString() === value);
             if (equipoSeleccionado) {
-                const esSalida = equipoSeleccionado.disponibilidad;
-                newData.tipo_movimiento = esSalida ? "Salida" : "Ingreso";
-
-                // 1. LÓGICA DE UBICACIÓN AUTO-ASIGNADA
-                if (esSalida) {
-                    // Si el equipo está disponible (Salida), forzamos la ubicación actual del equipo
+                if (data.tipo_movimiento === "Salida") {
+                    // Si se lo lleva (Salida), forzamos la ubicación actual del equipo
                     newData.id_ubicacion = equipoSeleccionado.id_ubicacion ? equipoSeleccionado.id_ubicacion.toString() : "";
                 } else {
-                    // Si el equipo no está disponible (Ingreso), borramos la ubicación para obligar al usuario a elegir
+                    // Si lo devuelve (Ingreso), borramos la ubicación para obligarlo a elegir dónde lo deja
                     newData.id_ubicacion = "";
                 }
             }
@@ -86,12 +89,8 @@ export const Formulario = () => {
             if (errorInsert) throw errorInsert;
 
             const nuevaDisponibilidad = data.tipo_movimiento === "Ingreso" ? true : false;
-
-            // NUEVO: Si es un Ingreso (se devuelve), el id_persona queda en null. 
-            // Si es una Salida (se lo llevan), asignamos el ID del usuario logueado.
             const idUsuarioActualizado = nuevaDisponibilidad ? null : user.id;
 
-            // B. Actualizar disponibilidad, ubicación y usuario en inventarioequipos
             const { error: errorUpdate } = await supabase
                 .from('inventarioequipos')
                 .update({
@@ -103,7 +102,6 @@ export const Formulario = () => {
 
             if (errorUpdate) throw errorUpdate;
 
-            // C. Actualizar estado local
             setEquipos(equipos.map(eq =>
                 eq.id_equipo.toString() === data.id_equipo
                     ? { ...eq, disponibilidad: nuevaDisponibilidad, id_ubicacion: parseInt(data.id_ubicacion), id_persona: idUsuarioActualizado }
@@ -119,20 +117,23 @@ export const Formulario = () => {
         }
     };
 
-    const equipoSeleccionadoInfo = equipos.find(eq => eq.id_equipo.toString() === data.id_equipo);
+    // 3. LÓGICA VISUAL: Filtrar equipos según el movimiento seleccionado
+    let equiposFiltrados = [];
+    if (data.tipo_movimiento === "Salida") {
+        equiposFiltrados = equipos.filter(eq => eq.disponibilidad === true);
+    } else if (data.tipo_movimiento === "Ingreso" && user) {
+        equiposFiltrados = equipos.filter(eq => eq.disponibilidad === false && eq.id_persona === user.id);
+    }
 
-    const opcionesMovimientoDinamicas = equipoSeleccionadoInfo
-        ? [equipoSeleccionadoInfo.disponibilidad ? "Salida" : "Ingreso"]
-        : ["Ingreso", "Salida"];
-
-    // 4. LÓGICA VISUAL: RESTRINGIR LAS OPCIONES DEL SELECTOR DE UBICACIÓN
+    // 4. LÓGICA VISUAL: Filtrar ubicaciones si es Salida
     let opcionesUbicacionDinamicas = ubicaciones.map(ub => ({ value: ub.id_ubicacion, label: ub.ubicacion }));
-
-    if (equipoSeleccionadoInfo && equipoSeleccionadoInfo.disponibilidad) {
-        // Si el equipo va a salir, filtramos las ubicaciones para mostrar ÚNICAMENTE donde se encuentra ahora
-        opcionesUbicacionDinamicas = opcionesUbicacionDinamicas.filter(
-            ub => ub.value === equipoSeleccionadoInfo.id_ubicacion
-        );
+    if (data.tipo_movimiento === "Salida" && data.id_equipo) {
+        const equipoSeleccionadoInfo = equipos.find(eq => eq.id_equipo.toString() === data.id_equipo);
+        if (equipoSeleccionadoInfo && equipoSeleccionadoInfo.id_ubicacion) {
+            opcionesUbicacionDinamicas = opcionesUbicacionDinamicas.filter(
+                ub => ub.value === equipoSeleccionadoInfo.id_ubicacion
+            );
+        }
     }
 
     return (
@@ -149,11 +150,22 @@ export const Formulario = () => {
                     </span>
                 </div>
 
+                {/* Opciones fijas, el usuario DEBE seleccionar una primero */}
+                <RadioButton
+                    name="tipo_movimiento"
+                    value={data.tipo_movimiento}
+                    onChange={handleChange}
+                    opciones={["Ingreso", "Salida"]}
+                >
+                    Movimiento:
+                </RadioButton>
+
                 <SelectInput
                     name="id_equipo"
                     value={data.id_equipo}
                     onChange={handleChange}
-                    opciones={equipos.map(eq => ({ value: eq.id_equipo, label: `${eq.tipo_equipo} - ${eq.marca} ${eq.modelo}` }))}
+                    opciones={equiposFiltrados.map(eq => ({ value: eq.id_equipo, label: `${eq.tipo_equipo} ${eq.marca} ${eq.modelo}` }))}
+                    disabled={!data.tipo_movimiento}
                 >
                     Equipo:
                 </SelectInput>
@@ -163,6 +175,7 @@ export const Formulario = () => {
                     value={data.id_ubicacion}
                     onChange={handleChange}
                     opciones={opcionesUbicacionDinamicas}
+                    disabled={!data.tipo_movimiento}
                 >
                     Ubicación:
                 </SelectInput>
@@ -176,15 +189,6 @@ export const Formulario = () => {
                 >
                     Observaciones:
                 </TextInput>
-
-                <RadioButton
-                    name="tipo_movimiento"
-                    value={data.tipo_movimiento}
-                    onChange={handleChange}
-                    opciones={opcionesMovimientoDinamicas}
-                >
-                    Movimiento:
-                </RadioButton>
 
                 <BotonFormulario className="boton-formulario">Registrar Movimiento</BotonFormulario>
             </form>

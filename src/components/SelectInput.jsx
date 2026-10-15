@@ -1,11 +1,20 @@
 import './SelectInput.css';
 
-export const SelectInput = ({ children, name, value, onChange, opciones }) => {
+// 1. Agregamos 'disabled' a los parámetros que recibe el componente
+export const SelectInput = ({ children, name, value, onChange, opciones, disabled }) => {
     return (
         <div className="select-input-container">
             <label htmlFor={name} className="select-label">{children}</label>
             <div className="select-wrapper">
-                <select name={name} id={name} className="select-control" value={value} onChange={onChange}>
+                {/* 2. Le pasamos la propiedad disabled a la etiqueta select */}
+                <select
+                    name={name}
+                    id={name}
+                    className="select-control"
+                    value={value}
+                    onChange={onChange}
+                    disabled={disabled}
+                >
                     <option value="" disabled>Seleccione...</option>
 
                     {opciones.map((opcion, index) => {

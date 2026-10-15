@@ -9,9 +9,15 @@
 .tabla-header-area {
     display: flex;
     flex-direction: column;
-    gap: 0.25rem;
-    margin-bottom: 0.75rem;
+    gap: 1rem;
+    margin-bottom: 1rem;
     text-align: left;
+}
+
+.tabla-titulos-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
 }
 
 .tabla-titulo {
@@ -27,6 +33,49 @@
     margin: 0;
 }
 
+/* Filtros de Fecha (Mobile First) */
+.tabla-filtros-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    background-color: #fafbfc;
+    padding: 1rem;
+    border-radius: var(--border-radius);
+    border: 1px solid var(--color-gris-4);
+}
+
+.filtro-grupo {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
+}
+
+.filtro-grupo label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--color-texto);
+}
+
+.input-fecha {
+    width: 65%;
+    padding: 0.6rem 0.8rem;
+    border: 1px solid var(--color-gris-4);
+    border-radius: var(--border-radius, 6px);
+    font-size: 0.85rem;
+    color: var(--color-texto);
+    background-color: #ffffff;
+    outline: none;
+    cursor: pointer;
+}
+
+.input-fecha:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* Contenedor de la Tabla */
 .tabla-responsive-container {
     width: 100%;
     overflow-x: auto;
@@ -114,6 +163,29 @@
 @media (min-width: 768px) {
     .seccion-tabla-movimientos {
         margin: 2rem auto 3rem;
+    }
+
+    .tabla-header-area {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: flex-end;
+    }
+
+    .tabla-filtros-container {
+        flex-direction: row;
+        align-items: center;
+        gap: 1.5rem;
+        padding: 0.75rem 1.25rem;
+        width: auto;
+    }
+
+    .filtro-grupo {
+        width: auto;
+        justify-content: flex-start;
+    }
+
+    .input-fecha {
+        width: auto;
     }
 
     .tabla-scroll-hint {
