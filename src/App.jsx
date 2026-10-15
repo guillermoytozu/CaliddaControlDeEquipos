@@ -5,11 +5,16 @@ import { PaginaInicio } from './pages/paginaInicio';
 import { PaginaInventario } from './pages/PaginaInventario';
 import { PaginaLogin } from './pages/paginaLogin';
 import { AuthProvider } from './context/AuthContext';
+import logoCalidda from './IMG/logo.png';
 
 function App() {
   return (
     <AuthProvider>
       <BrowserRouter basename={import.meta.env.DEV ? '/' : '/CaliddaControlDeEquipos/'}>
+        <header id="header">
+          <img src={logoCalidda} />
+          <h1 id="titulo">CONTROL DE EQUIPOS <br /> CÁLIDDA</h1>
+        </header>
         <Navegacion />
         <Routes>
           <Route path="/login" element={<PaginaLogin />} />
