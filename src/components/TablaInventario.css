@@ -9,9 +9,15 @@
 .tabla-header-area {
     display: flex;
     flex-direction: column;
-    gap: 0.25rem;
-    margin-bottom: 0.75rem;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
     text-align: left;
+}
+
+.tabla-titulos-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
 }
 
 .tabla-titulo {
@@ -27,6 +33,78 @@
     margin: 0;
 }
 
+.tabla-contador-registros {
+    font-weight: 600;
+    color: var(--color-calidda-dark);
+}
+
+.btn-limpiar-todos-filtros {
+    align-self: flex-start;
+    background: transparent;
+    border: none;
+    color: var(--color-calidda-dark);
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: underline;
+    padding: 0.15rem 0;
+    margin-top: 0.25rem;
+    transition: color var(--transition-fast);
+}
+
+.btn-limpiar-todos-filtros:hover {
+    color: var(--color-rojo);
+}
+
+.tabla-acciones-header {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+/* Botón Exportar a Excel */
+.btn-exportar-excel {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    background-color: var(--color-verde);
+    color: #ffffff;
+    border: none;
+    border-radius: var(--border-radius);
+    padding: 0.6rem 1.15rem;
+    font-size: 0.88rem;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: var(--shadow-sm);
+    transition: background-color var(--transition-fast), transform var(--transition-fast), box-shadow var(--transition-fast);
+    white-space: nowrap;
+}
+
+.btn-exportar-excel:hover:not(:disabled) {
+    background-color: var(--color-verde-dark);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-1px);
+}
+
+.btn-exportar-excel:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+.btn-exportar-excel:disabled {
+    background-color: var(--color-gris-3);
+    cursor: not-allowed;
+    opacity: 0.65;
+    box-shadow: none;
+}
+
+.excel-icon {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+}
+
+/* Contenedor de la Tabla */
 .tabla-responsive-container {
     width: 100%;
     overflow-x: auto;
@@ -39,29 +117,135 @@
 
 .tabla-datos {
     width: 100%;
-    min-width: 580px;
+    min-width: 760px;
     border-collapse: collapse;
     text-align: left;
     font-size: 0.88rem;
 }
 
+/* Encabezados - Fila 1 (Sortable) */
 .tabla-datos th {
-    background-color: var(--color-gris-5);
-    color: #475569;
+    background-color: #f1f5f9;
+    color: #334155;
     font-weight: 700;
-    padding: 0.85rem 1rem;
-    border-bottom: 2px solid var(--color-gris-4);
-    white-space: nowrap;
+    padding: 0.75rem 0.85rem;
+    border-bottom: 1px solid var(--color-gris-4);
     font-size: 0.78rem;
     text-transform: uppercase;
     letter-spacing: 0.04em;
+    vertical-align: middle;
 }
 
+.th-ordenable {
+    cursor: pointer;
+    user-select: none;
+    transition: background-color var(--transition-fast);
+}
+
+.th-ordenable:hover {
+    background-color: #e2e8f0;
+}
+
+.th-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.35rem;
+}
+
+.sort-icon-active {
+    color: var(--color-calidda-dark);
+    font-weight: 800;
+    font-size: 0.75rem;
+}
+
+.sort-icon-neutral {
+    color: #94a3b8;
+    font-size: 0.82rem;
+    opacity: 0.55;
+}
+
+/* Fila 2: Inputs de búsqueda por columna */
+.fila-filtros-columnas th {
+    background-color: #f8fafc;
+    padding: 0.35rem 0.55rem 0.55rem;
+    border-bottom: 2px solid var(--color-gris-4);
+    font-weight: normal;
+}
+
+.filtro-input-wrapper {
+    position: relative;
+    width: 100%;
+    display: flex;
+    align-items: center;
+}
+
+.input-filtro-columna {
+    width: 100%;
+    padding: 0.32rem 1.3rem 0.32rem 0.45rem;
+    font-size: 0.75rem;
+    font-family: inherit;
+    color: var(--color-texto);
+    background-color: #ffffff;
+    border: 1px solid var(--color-gris-4);
+    border-radius: var(--border-radius-sm, 4px);
+    outline: none;
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+    font-weight: normal;
+    text-transform: none;
+    letter-spacing: normal;
+}
+
+.input-filtro-columna:focus {
+    border-color: var(--color-calidda);
+    box-shadow: 0 0 0 2px rgba(0, 161, 222, 0.15);
+}
+
+.input-filtro-columna::placeholder {
+    color: #94a3b8;
+    font-size: 0.72rem;
+}
+
+.btn-limpiar-filtro-columna {
+    position: absolute;
+    right: 4px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: transparent;
+    border: none;
+    color: #94a3b8;
+    cursor: pointer;
+    font-size: 0.9rem;
+    line-height: 1;
+    padding: 2px 4px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-limpiar-filtro-columna:hover {
+    color: var(--color-rojo);
+}
+
+/* Anchos mínimos por columna para visualización armónica */
+.col-inv-equipo { min-width: 180px; }
+.col-inv-estado { min-width: 95px; }
+.col-inv-detalle { min-width: 130px; }
+.col-inv-disponibilidad { min-width: 110px; }
+.col-inv-ubicacion { min-width: 125px; }
+.col-inv-usuario { min-width: 130px; }
+
+/* Filas alternadas (Zebra) y celdas */
 .tabla-datos td {
-    padding: 0.85rem 1rem;
+    padding: 0.85rem 0.85rem;
     border-bottom: 1px solid var(--color-gris-4);
     color: var(--color-texto);
     vertical-align: middle;
+}
+
+.tabla-datos tbody tr:nth-child(odd) {
+    background-color: #ffffff;
 }
 
 .tabla-datos tbody tr:nth-child(even) {
@@ -90,7 +274,6 @@
     align-items: center;
     gap: 0.45rem;
     padding: 0.25rem 0.75rem;
-
     font-size: 0.8rem;
     font-weight: 700;
     letter-spacing: 0.02em;
@@ -98,12 +281,10 @@
 
 .badge-disponibilidad.disponible {
     color: #15803d;
-
 }
 
 .badge-disponibilidad.en-uso {
     color: #b91c1c;
-
 }
 
 /* Tablet y Desktop */
@@ -112,8 +293,14 @@
         margin: 2rem auto 3rem;
     }
 
-    .tabla-scroll-hint {
-        display: none;
+    .tabla-header-area {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: flex-end;
+    }
+
+    .tabla-acciones-header {
+        justify-content: flex-end;
     }
 
     .tabla-datos {
@@ -122,10 +309,10 @@
 
     .tabla-datos th {
         font-size: 0.82rem;
-        padding: 0.95rem 1.15rem;
+        padding: 0.85rem 1rem;
     }
 
     .tabla-datos td {
-        padding: 0.95rem 1.15rem;
+        padding: 0.85rem 1rem;
     }
 }
