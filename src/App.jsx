@@ -1,9 +1,10 @@
 import { Footer } from './components/Footer';
 import { Navegacion } from './components/Navegacion';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { PaginaInicio } from './pages/paginaInicio';
-import { PaginaInventario } from './pages/PaginaInventario';
 import { PaginaLogin } from './pages/paginaLogin';
+import { PaginaInicio } from './pages/paginaInicio';
+import { PaginaTrazabilidad } from './pages/PaginaTrazabilidad';
+import { PaginaInventario } from './pages/PaginaInventario';
 import { AuthProvider } from './context/AuthContext';
 import logoCalidda from './IMG/logo.png';
 import './App.css';
@@ -24,7 +25,8 @@ function App() {
             <Routes>
               <Route path="/login" element={<PaginaLogin />} />
               <Route path="/" element={<Navigate to="/login" replace />} />
-              <Route path="/inicio" element={<PaginaInicio />} />
+              <Route path="/registro" element={<PaginaInicio />} />
+              <Route path="/trazabilidad" element={<PaginaTrazabilidad />} />
               <Route path="/inventario" element={<PaginaInventario />} />
             </Routes>
           </main>

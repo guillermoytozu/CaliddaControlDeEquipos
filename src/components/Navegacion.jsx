@@ -11,12 +11,17 @@ export const Navegacion = () => {
                     </NavLink>
                 </li>
                 <li>
-                    <NavLink id="Link-inicio" to="/inicio" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
-                        Inicio
+                    <NavLink id="Link-inicio" to="/registro" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
+                        Registro
                     </NavLink>
                 </li>
                 <li>
-                    <NavLink id="Link-fotos" to="/inventario" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
+                    <NavLink id="Link-trazabilidad" to="/trazabilidad" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
+                        Trazabilidad
+                    </NavLink>
+                </li>
+                <li>
+                    <NavLink id="Link-inventario" to="/inventario" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
                         Inventario
                     </NavLink>
                 </li>

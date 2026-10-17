@@ -14,17 +14,18 @@ export const TablaMovimientos = () => {
     const [fechaInicio, setFechaInicio] = useState(hoy);
     const [fechaFin, setFechaFin] = useState(hoy);
 
-    useEffect(() => {
-        const cargarDatos = async () => {
-            setCargando(true);
-            try {
-                // Ajustamos las horas para abarcar el día completo seleccionado
-                const inicioRango = `${fechaInicio} 00:00:00`;
-                const finRango = `${fechaFin} 23:59:59`;
+    useEffect(
+        () => {
+            const cargarDatos = async () => {
+                setCargando(true);
+                try {
+                    // Ajustamos las horas para abarcar el día completo seleccionado
+                    const inicioRango = `${fechaInicio} 00:00:00`;
+                    const finRango = `${fechaFin} 23:59:59`;
 
-                const { data, error } = await supabase
-                    .from('movimientos')
-                    .select(`
+                    const { data, error } = await supabase
+                        .from('movimientos')
+                        .select(`
                         id_movimiento,
                         tipo_movimiento,
                         fecha_hora,
@@ -32,26 +33,26 @@ export const TablaMovimientos = () => {
                         inventarioequipos ( tipo_equipo, marca, modelo ),
                         ubicaciones ( ubicacion )
                     `)
-                    .gte('fecha_hora', inicioRango)
-                    .lte('fecha_hora', finRango)
-                    .order('fecha_hora', { ascending: false });
+                        .gte('fecha_hora', inicioRango)
+                        .lte('fecha_hora', finRango)
+                        .order('fecha_hora', { ascending: false });
 
-                if (error) throw error;
+                    if (error) throw error;
 
-                setMovimientos(data);
-                setCargando(false);
-            } catch (err) {
-                console.error("Error al cargar los datos de Supabase:", err.message);
-                setError(true);
-                setCargando(false);
+                    setMovimientos(data);
+                    setCargando(false);
+                } catch (err) {
+                    console.error("Error al cargar los datos de Supabase:", err.message);
+                    setError(true);
+                    setCargando(false);
+                }
+            };
+
+            // Evitar consultas si las fechas están vacías
+            if (fechaInicio && fechaFin) {
+                cargarDatos();
             }
-        };
-
-        // Evitar consultas si las fechas están vacías
-        if (fechaInicio && fechaFin) {
-            cargarDatos();
-        }
-    }, [fechaInicio, fechaFin]); // El hook se vuelve a ejecutar cada vez que cambian las fechas
+        }, [fechaInicio, fechaFin]); // El hook se vuelve a ejecutar cada vez que cambian las fechas
 
     return (
         <section id="seccion-lista" className="seccion-tabla-movimientos">
