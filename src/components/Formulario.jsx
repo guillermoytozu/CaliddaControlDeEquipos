@@ -35,24 +35,15 @@ export const Formulario = () => {
         const { name, value } = e.target;
         let newData = { ...data, [name]: value };
 
-        // 1. Si el usuario cambia el tipo de movimiento, limpiamos el equipo y la ubicación seleccionados
+        // 1. Si el usuario cambia el tipo de movimiento, limpiamos la ubicación y el equipo seleccionados
         if (name === "tipo_movimiento") {
-            newData.id_equipo = "";
             newData.id_ubicacion = "";
+            newData.id_equipo = "";
         }
 
-        // 2. Si el usuario selecciona un equipo
-        if (name === "id_equipo") {
-            const equipoSeleccionado = equipos.find(eq => eq.id_equipo.toString() === value);
-            if (equipoSeleccionado) {
-                if (data.tipo_movimiento === "Salida") {
-                    // Si se lo lleva (Salida), forzamos la ubicación actual del equipo
-                    newData.id_ubicacion = equipoSeleccionado.id_ubicacion ? equipoSeleccionado.id_ubicacion.toString() : "";
-                } else {
-                    // Si lo devuelve (Ingreso), borramos la ubicación para obligarlo a elegir dónde lo deja
-                    newData.id_ubicacion = "";
-                }
-            }
+        // 2. Si el usuario cambia la ubicación, limpiamos el equipo seleccionado
+        if (name === "id_ubicacion") {
+            newData.id_equipo = "";
         }
 
         setData(newData);
@@ -67,6 +58,10 @@ export const Formulario = () => {
         }
 
         const equipoActual = equipos.find(eq => eq.id_equipo.toString() === data.id_equipo);
+
+        if (!equipoActual) {
+            return alert("Equipo no encontrado.");
+        }
 
         if (equipoActual.disponibilidad === false && data.tipo_movimiento === "Salida") {
             return alert("Error crítico: No se puede dar salida a un equipo que no está disponible.");
@@ -117,24 +112,39 @@ export const Formulario = () => {
         }
     };
 
-    // 3. LÓGICA VISUAL: Filtrar equipos según el movimiento seleccionado
+    // Opciones de ubicación dinámicas
+    const opcionesUbicacionDinamicas = ubicaciones.map(ub => ({
+        value: ub.id_ubicacion,
+        label: ub.ubicacion
+    }));
+
+    // Lógica de filtrado de equipos: la ubicación desbloquea y filtra los equipos
     let equiposFiltrados = [];
-    if (data.tipo_movimiento === "Salida") {
-        equiposFiltrados = equipos.filter(eq => eq.disponibilidad === true);
-    } else if (data.tipo_movimiento === "Ingreso" && user) {
-        equiposFiltrados = equipos.filter(eq => eq.disponibilidad === false && eq.id_persona === user.id);
+    if (data.tipo_movimiento === "Salida" && data.id_ubicacion) {
+        // En Salida: solo equipos disponibles en la ubicación seleccionada
+        equiposFiltrados = equipos.filter(
+            eq => eq.disponibilidad === true && eq.id_ubicacion?.toString() === data.id_ubicacion.toString()
+        );
+    } else if (data.tipo_movimiento === "Ingreso" && data.id_ubicacion && user) {
+        // En Ingreso: equipos del usuario que se ingresarán a dicha ubicación
+        equiposFiltrados = equipos.filter(
+            eq => eq.disponibilidad === false && eq.id_persona === user.id
+        );
     }
 
-    // 4. LÓGICA VISUAL: Filtrar ubicaciones si es Salida
-    let opcionesUbicacionDinamicas = ubicaciones.map(ub => ({ value: ub.id_ubicacion, label: ub.ubicacion }));
-    if (data.tipo_movimiento === "Salida" && data.id_equipo) {
-        const equipoSeleccionadoInfo = equipos.find(eq => eq.id_equipo.toString() === data.id_equipo);
-        if (equipoSeleccionadoInfo && equipoSeleccionadoInfo.id_ubicacion) {
-            opcionesUbicacionDinamicas = opcionesUbicacionDinamicas.filter(
-                ub => ub.value === equipoSeleccionadoInfo.id_ubicacion
-            );
-        }
+    // Placeholder dinámico para el selector de equipo
+    let placeholderEquipo = "Seleccione equipo...";
+    if (!data.tipo_movimiento) {
+        placeholderEquipo = "Seleccione movimiento primero...";
+    } else if (!data.id_ubicacion) {
+        placeholderEquipo = "Seleccione ubicación primero...";
+    } else if (equiposFiltrados.length === 0) {
+        placeholderEquipo = data.tipo_movimiento === "Salida"
+            ? "No hay equipos disponibles en esta ubicación"
+            : "No tienes equipos asignados para ingresar";
     }
+
+    const equiposBloqueado = !data.tipo_movimiento || !data.id_ubicacion || equiposFiltrados.length === 0;
 
     return (
         <div className="formulario-container">
@@ -150,7 +160,7 @@ export const Formulario = () => {
                     </span>
                 </div>
 
-                {/* Opciones fijas, el usuario DEBE seleccionar una primero */}
+                {/* Paso 1: Tipo de movimiento */}
                 <RadioButton
                     name="tipo_movimiento"
                     value={data.tipo_movimiento}
@@ -160,25 +170,30 @@ export const Formulario = () => {
                     Movimiento:
                 </RadioButton>
 
-                <SelectInput
-                    name="id_equipo"
-                    value={data.id_equipo}
-                    onChange={handleChange}
-                    opciones={equiposFiltrados.map(eq => ({ value: eq.id_equipo, label: `${eq.tipo_equipo} ${eq.marca} ${eq.modelo}` }))}
-                    disabled={!data.tipo_movimiento}
-                >
-                    Equipo:
-                </SelectInput>
-
+                {/* Paso 2: El tipo de movimiento desbloquea la ubicación */}
                 <SelectInput
                     name="id_ubicacion"
                     value={data.id_ubicacion}
                     onChange={handleChange}
                     opciones={opcionesUbicacionDinamicas}
                     disabled={!data.tipo_movimiento}
+                    placeholder={!data.tipo_movimiento ? "Seleccione movimiento primero..." : "Seleccione ubicación..."}
                 >
                     Ubicación:
                 </SelectInput>
+
+                {/* Paso 3: La ubicación desbloquea los equipos (filtrados por la ubicación seleccionada) */}
+                <SelectInput
+                    name="id_equipo"
+                    value={data.id_equipo}
+                    onChange={handleChange}
+                    opciones={equiposFiltrados.map(eq => ({ value: eq.id_equipo, label: `${eq.tipo_equipo} ${eq.marca} ${eq.modelo}` }))}
+                    disabled={equiposBloqueado}
+                    placeholder={placeholderEquipo}
+                >
+                    Equipo:
+                </SelectInput>
+
 
                 <TextInput
                     name="observaciones"

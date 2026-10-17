@@ -2,7 +2,7 @@ import { Footer } from './components/Footer';
 import { Navegacion } from './components/Navegacion';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { PaginaLogin } from './pages/paginaLogin';
-import { PaginaInicio } from './pages/paginaInicio';
+import { PaginaRegistro } from './pages/paginaRegistro';
 import { PaginaTrazabilidad } from './pages/PaginaTrazabilidad';
 import { PaginaInventario } from './pages/PaginaInventario';
 import { AuthProvider, useAuth } from './context/AuthContext';
@@ -41,7 +41,7 @@ function AppContent() {
 
             {/* Rutas Protegidas (redirigen a /login si no hay sesión activa) */}
             <Route element={<RutaProtegida />}>
-              <Route path="/registro" element={<PaginaInicio />} />
+              <Route path="/registro" element={<PaginaRegistro />} />
               <Route path="/trazabilidad" element={<PaginaTrazabilidad />} />
               <Route path="/inventario" element={<PaginaInventario />} />
             </Route>

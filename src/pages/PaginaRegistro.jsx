@@ -1,7 +1,7 @@
 import { Formulario } from "../components/Formulario";
-import './paginaInicio.css';
+import './PaginaRegistro.css';
 
-export const PaginaInicio = () => {
+export const PaginaRegistro = () => {
     return (
         <div className="pagina-inicio">
             <Formulario />
