@@ -1,4 +1,3 @@
-import { TextInput } from "./TextInput";
 import { SelectInput } from "./SelectInput";
 import { RadioButton } from "./RadioButton";
 import { BotonFormulario } from "./BotonFormulario";
@@ -255,64 +254,35 @@ export const Formulario = () => {
                     Ubicación:
                 </SelectInput>
 
-                {/* Sección de Equipos y Observaciones Dinámicas */}
+                {/* Sección de Equipos y Observaciones Dinámicas integradas en SelectInput */}
                 <div className="contenedor-equipos-dinamicos">
                     {equiposSeleccionados.map((item, index) => {
                         const labelEquipo = equiposSeleccionados.length === 1 ? "Equipo:" : `Equipo #${index + 1}:`;
-                        const labelObservaciones = equiposSeleccionados.length === 1 ? "Observaciones:" : `Observaciones (Equipo #${index + 1}):`;
+                        const labelObservaciones = equiposSeleccionados.length === 1 ? "Observaciones (Opcional):" : `Observaciones (Equipo #${index + 1}):`;
 
                         return (
-                            <div key={index} className="item-equipo-dinamico">
-                                <div className="fila-equipo-select">
-                                    <div className="fila-equipo-select-control">
-                                        <SelectInput
-                                            name={`id_equipo_${index}`}
-                                            value={item.id_equipo}
-                                            onChange={(e) => handleEquipoChange(index, "id_equipo", e.target.value)}
-                                            opciones={getOpcionesParaFila(index)}
-                                            disabled={equiposBloqueado}
-                                            placeholder={placeholderEquipo}
-                                        >
-                                            {labelEquipo}
-                                        </SelectInput>
-                                    </div>
-
-                                    <div className="acciones-equipo-fila">
-                                        <button
-                                            type="button"
-                                            className="btn-accion-equipo btn-agregar-equipo"
-                                            onClick={agregarFilaEquipo}
-                                            disabled={!puedeAgregarFila}
-                                            title={tooltipBotonAgregar}
-                                            aria-label="Agregar otro equipo"
-                                        >
-                                            +
-                                        </button>
-
-                                        {equiposSeleccionados.length > 1 && (
-                                            <button
-                                                type="button"
-                                                className="btn-accion-equipo btn-eliminar-equipo"
-                                                onClick={() => eliminarFilaEquipo(index)}
-                                                title="Eliminar este equipo"
-                                                aria-label="Eliminar este equipo"
-                                            >
-                                                ✕
-                                            </button>
-                                        )}
-                                    </div>
-                                </div>
-
-                                <TextInput
-                                    name={`observaciones_${index}`}
-                                    id={`observaciones_${index}`}
-                                    value={item.observaciones}
-                                    onChange={(e) => handleEquipoChange(index, "observaciones", e.target.value)}
-                                    placeholder="Observaciones de este equipo (Opcional)"
-                                >
-                                    {labelObservaciones}
-                                </TextInput>
-                            </div>
+                            <SelectInput
+                                key={index}
+                                name={`id_equipo_${index}`}
+                                value={item.id_equipo}
+                                onChange={(e) => handleEquipoChange(index, "id_equipo", e.target.value)}
+                                opciones={getOpcionesParaFila(index)}
+                                disabled={equiposBloqueado}
+                                placeholder={placeholderEquipo}
+                                mostrarObservaciones={true}
+                                labelObservaciones={labelObservaciones}
+                                observaciones={item.observaciones}
+                                onObservacionesChange={(e) => handleEquipoChange(index, "observaciones", e.target.value)}
+                                placeholderObservaciones="Observaciones de este equipo (Opcional)"
+                                mostrarBotonAgregar={true}
+                                onAgregar={agregarFilaEquipo}
+                                disabledAgregar={!puedeAgregarFila}
+                                tooltipAgregar={tooltipBotonAgregar}
+                                mostrarBotonEliminar={equiposSeleccionados.length > 1}
+                                onEliminar={() => eliminarFilaEquipo(index)}
+                            >
+                                {labelEquipo}
+                            </SelectInput>
                         );
                     })}
                 </div>
