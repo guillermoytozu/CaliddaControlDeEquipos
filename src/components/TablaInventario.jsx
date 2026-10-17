@@ -20,7 +20,7 @@ export const TablaInventario = () => {
                         modelo,
                         numero_serie,
                         estado,
-                        comentarios,
+                        detalle_equipo,
                         disponibilidad,
                         ubicaciones ( ubicacion ),
                         persona ( nombre )
@@ -55,7 +55,7 @@ export const TablaInventario = () => {
             <tr>
               <th>Equipo</th>
               <th>Estado</th>
-              <th>Comentarios</th>
+              <th>Detalle</th>
               <th>Disponibilidad</th>
               <th>Ubicación</th>
               <th>Usuario actual</th>
@@ -100,7 +100,7 @@ export const TablaInventario = () => {
                       {numeroSerie}
                     </td>
                     <td>{equipo.estado}</td>
-                    <td>{equipo.comentarios}</td>
+                    <td>{equipo.detalle_equipo}</td>
                     <td>
                       <span
                         className={`badge-disponibilidad ${estaDisponible ? "disponible" : "en-uso"}`}
