@@ -3,7 +3,7 @@ import './PaginaRegistro.css';
 
 export const PaginaRegistro = () => {
     return (
-        <div className="pagina-inicio">
+        <div className="pagina-registro">
             <Formulario />
         </div>
     );

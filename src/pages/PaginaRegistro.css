@@ -1,5 +1,5 @@
 /* PaginaInicio - Mobile First */
-.pagina-inicio {
+.pagina-registro {
     width: 100%;
     display: flex;
     flex-direction: column;
@@ -21,13 +21,13 @@
 
 /* Tablet y Desktop */
 @media (min-width: 768px) {
-    .pagina-inicio {
+    .pagina-registro {
         gap: 2rem;
     }
 }
 
 @media (min-width: 1024px) {
-    .pagina-inicio {
+    .pagina-registro {
         gap: 2.5rem;
     }
 }
