@@ -125,13 +125,74 @@
     transform: translateY(-1px);
 }
 
+/* Fila de detalles: Estado + Observaciones */
+.select-detalles-row {
+    display: flex;
+    gap: 0.65rem;
+    width: 100%;
+    margin-top: 0.35rem;
+    align-items: flex-start;
+}
+
+/* Menú desplegable pequeño de estado */
+.select-estado-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    width: 140px;
+    flex-shrink: 0;
+}
+
+.select-estado-label {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--color-texto-muted);
+}
+
+.select-estado-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.select-estado-control {
+    width: 100%;
+    min-height: 42px;
+    padding: 0.65rem 2rem 0.65rem 0.8rem;
+    font-size: 0.95rem;
+    font-family: inherit;
+    border: 1.5px solid var(--color-gris-4);
+    border-radius: var(--border-radius);
+    background-color: #ffffff;
+    color: var(--color-texto);
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 0.65rem center;
+    background-size: 1rem;
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.select-estado-control:focus {
+    outline: none;
+    border-color: var(--color-calidda);
+    box-shadow: 0 0 0 3px rgba(0, 161, 222, 0.2);
+}
+
+.select-estado-control:disabled {
+    background-color: var(--color-gris-5);
+    color: var(--color-gris-3);
+    cursor: not-allowed;
+}
+
 /* Campo integrado de observaciones */
 .select-observaciones-container {
     display: flex;
     flex-direction: column;
     gap: 0.3rem;
-    width: 100%;
-    margin-top: 0.35rem;
+    flex: 1;
+    min-width: 0;
 }
 
 .select-observaciones-label {
@@ -168,4 +229,14 @@
 .select-observaciones-field::placeholder {
     color: var(--color-gris-3);
     font-size: 0.9rem;
+}
+
+@media (max-width: 480px) {
+    .select-detalles-row {
+        flex-direction: column;
+    }
+
+    .select-estado-container {
+        width: 100%;
+    }
 }
