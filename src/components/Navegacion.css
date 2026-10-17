@@ -1,12 +1,22 @@
 /* Navegación - Mobile First */
 .navegacion-principal {
     background: var(--linear-gradient);
-    padding: 0.4rem 0.5rem;
+    padding: 0.4rem 0.75rem;
     box-shadow: 0 2px 8px rgba(0, 161, 222, 0.2);
     position: sticky;
     top: 0;
     z-index: 50;
     width: 100%;
+}
+
+.navegacion-contenedor {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    flex-wrap: wrap;
 }
 
 .lista-Nav {
@@ -53,6 +63,72 @@
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.12);
 }
 
+/* Área de Usuario y Cerrar Sesión */
+.nav-usuario-area {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    margin-left: auto;
+}
+
+.nav-user-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 2px solid #ffffff;
+    object-fit: cover;
+    box-shadow: var(--shadow-sm);
+}
+
+.nav-user-name {
+    color: #ffffff;
+    font-size: 0.85rem;
+    font-weight: 600;
+    max-width: 150px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.btn-cerrar-sesion {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    background-color: rgba(255, 255, 255, 0.18);
+    color: #ffffff;
+    border: 1.5px solid rgba(255, 255, 255, 0.6);
+    border-radius: var(--border-radius-full);
+    padding: 0.4rem 0.95rem;
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+    min-height: 38px;
+    transition: all var(--transition-fast);
+}
+
+.btn-cerrar-sesion:hover {
+    background-color: #ffffff;
+    color: var(--color-rojo-dark);
+    border-color: #ffffff;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+    transform: translateY(-1px);
+}
+
+.btn-cerrar-sesion:active {
+    transform: scale(0.97);
+}
+
+.btn-cerrar-sesion:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.icon-logout {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+}
+
 /* Tablet y Desktop */
 @media (min-width: 640px) {
     .navegacion-principal {
@@ -60,12 +136,36 @@
     }
 
     .lista-Nav {
-        gap: 1.25rem;
+        gap: 1rem;
     }
 
     .nav-link {
         font-size: 1rem;
-        padding: 0.55rem 1.4rem;
+        padding: 0.55rem 1.3rem;
         min-height: 44px;
+    }
+
+    .btn-cerrar-sesion {
+        font-size: 0.9rem;
+        padding: 0.45rem 1.1rem;
+        min-height: 40px;
+    }
+}
+
+@media (max-width: 639px) {
+    .navegacion-contenedor {
+        justify-content: center;
+    }
+
+    .nav-usuario-area {
+        width: 100%;
+        justify-content: center;
+        margin-left: 0;
+        padding-top: 0.35rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .nav-user-name {
+        max-width: 110px;
     }
 }

@@ -66,6 +66,32 @@
     box-shadow: var(--shadow-sm);
 }
 
+.btn-google:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.login-error-alert {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background-color: var(--color-rojo-light);
+    color: var(--color-rojo-dark);
+    border: 1px solid var(--color-rojo);
+    border-radius: var(--border-radius);
+    padding: 0.75rem 1rem;
+    margin-bottom: 1.25rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+    text-align: left;
+}
+
+.login-error-icon {
+    font-size: 1.1rem;
+    flex-shrink: 0;
+}
+
 .google-icon-svg {
     width: 22px;
     height: 22px;
