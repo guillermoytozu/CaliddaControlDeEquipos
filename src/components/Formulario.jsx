@@ -20,6 +20,7 @@ export const Formulario = () => {
     // Estado del primer componente (área de selección)
     const [equipoInput, setEquipoInput] = useState({
         id_equipo: "",
+        estado: "operativo",
         observaciones: ""
     });
 
@@ -44,13 +45,13 @@ export const Formulario = () => {
         // 1. Si el usuario cambia el tipo de movimiento, limpiamos ubicación y equipos
         if (name === "tipo_movimiento") {
             newData.id_ubicacion = "";
-            setEquipoInput({ id_equipo: "", observaciones: "" });
+            setEquipoInput({ id_equipo: "", estado: "operativo", observaciones: "" });
             setEquiposAgregados([]);
         }
 
         // 2. Si el usuario cambia la ubicación, limpiamos los equipos
         if (name === "id_ubicacion") {
-            setEquipoInput({ id_equipo: "", observaciones: "" });
+            setEquipoInput({ id_equipo: "", estado: "operativo", observaciones: "" });
             setEquiposAgregados([]);
         }
 
@@ -63,11 +64,15 @@ export const Formulario = () => {
 
         setEquiposAgregados(prev => [
             ...prev,
-            { id_equipo: equipoInput.id_equipo, observaciones: equipoInput.observaciones }
+            {
+                id_equipo: equipoInput.id_equipo,
+                estado: equipoInput.estado || "operativo",
+                observaciones: equipoInput.observaciones
+            }
         ]);
 
         // Resetea el primer componente dejándolo listo para seleccionar otro equipo
-        setEquipoInput({ id_equipo: "", observaciones: "" });
+        setEquipoInput({ id_equipo: "", estado: "operativo", observaciones: "" });
     };
 
     // Permite eliminar un equipo de la lista de abajo
@@ -75,7 +80,7 @@ export const Formulario = () => {
         setEquiposAgregados(prev => prev.filter((_, idx) => idx !== indexAEliminar));
     };
 
-    // Permite editar un equipo o sus observaciones en la lista de abajo
+    // Permite editar un equipo o sus observaciones/estado en la lista de abajo
     const handleAgregadoChange = (index, campo, valor) => {
         setEquiposAgregados(prev => {
             const copia = [...prev];
@@ -127,15 +132,23 @@ export const Formulario = () => {
             }
         }
 
+        const esIngreso = data.tipo_movimiento === "Ingreso";
+
         try {
             // 1. Inserción de movimientos para cada equipo
-            const movimientosAInsertar = equiposParaRegistrar.map(item => ({
-                id_persona: user.id,
-                id_equipo: parseInt(item.id_equipo),
-                id_ubicacion: parseInt(data.id_ubicacion),
-                tipo_movimiento: data.tipo_movimiento,
-                observaciones: item.observaciones ? item.observaciones.trim() : ""
-            }));
+            const movimientosAInsertar = equiposParaRegistrar.map(item => {
+                const equipoActual = equipos.find(eq => eq.id_equipo.toString() === item.id_equipo.toString());
+                return {
+                    id_persona: user.id,
+                    id_equipo: parseInt(item.id_equipo),
+                    id_ubicacion: parseInt(data.id_ubicacion),
+                    tipo_movimiento: data.tipo_movimiento,
+                    observaciones: item.observaciones ? item.observaciones.trim() : "",
+                    estado_historico: esIngreso
+                        ? (item.estado || equipoActual?.estado || "operativo")
+                        : (equipoActual?.estado || null)
+                };
+            });
 
             const { error: errorInsert } = await supabase
                 .from('movimientos')
@@ -144,32 +157,65 @@ export const Formulario = () => {
             if (errorInsert) throw errorInsert;
 
             // 2. Actualización de inventarioequipos para todos los equipos seleccionados
-            const nuevaDisponibilidad = data.tipo_movimiento === "Ingreso" ? true : false;
-            const idUsuarioActualizado = nuevaDisponibilidad ? null : user.id;
-            const idsEquiposInt = equiposParaRegistrar.map(item => parseInt(item.id_equipo));
+            if (esIngreso) {
+                // En Ingreso: actualizamos disponibilidad a true, liberamos usuario (null) y actualizamos estado
+                const promesasUpdate = equiposParaRegistrar.map(item => {
+                    const estadoFinal = item.estado || "operativo";
+                    return supabase
+                        .from('inventarioequipos')
+                        .update({
+                            disponibilidad: true,
+                            id_ubicacion: parseInt(data.id_ubicacion),
+                            id_persona: null,
+                            estado: estadoFinal
+                        })
+                        .eq('id_equipo', parseInt(item.id_equipo));
+                });
 
-            const { error: errorUpdate } = await supabase
-                .from('inventarioequipos')
-                .update({
-                    disponibilidad: nuevaDisponibilidad,
-                    id_ubicacion: parseInt(data.id_ubicacion),
-                    id_persona: idUsuarioActualizado
-                })
-                .in('id_equipo', idsEquiposInt);
+                const respuestasUpdate = await Promise.all(promesasUpdate);
+                const primerError = respuestasUpdate.find(r => r.error);
+                if (primerError) throw primerError.error;
 
-            if (errorUpdate) throw errorUpdate;
+                // 3. Actualizar estado local
+                setEquipos(equipos.map(eq => {
+                    const reg = equiposParaRegistrar.find(item => item.id_equipo.toString() === eq.id_equipo.toString());
+                    if (reg) {
+                        return {
+                            ...eq,
+                            disponibilidad: true,
+                            id_ubicacion: parseInt(data.id_ubicacion),
+                            id_persona: null,
+                            estado: reg.estado || eq.estado || "operativo"
+                        };
+                    }
+                    return eq;
+                }));
+            } else {
+                // En Salida: actualizamos disponibilidad a false y asignamos a usuario
+                const idsEquiposInt = equiposParaRegistrar.map(item => parseInt(item.id_equipo));
+                const { error: errorUpdate } = await supabase
+                    .from('inventarioequipos')
+                    .update({
+                        disponibilidad: false,
+                        id_ubicacion: parseInt(data.id_ubicacion),
+                        id_persona: user.id
+                    })
+                    .in('id_equipo', idsEquiposInt);
 
-            // 3. Actualizar estado local
-            setEquipos(equipos.map(eq =>
-                idsEquiposInt.includes(eq.id_equipo)
-                    ? { ...eq, disponibilidad: nuevaDisponibilidad, id_ubicacion: parseInt(data.id_ubicacion), id_persona: idUsuarioActualizado }
-                    : eq
-            ));
+                if (errorUpdate) throw errorUpdate;
+
+                // 3. Actualizar estado local
+                setEquipos(equipos.map(eq =>
+                    idsEquiposInt.includes(eq.id_equipo)
+                        ? { ...eq, disponibilidad: false, id_ubicacion: parseInt(data.id_ubicacion), id_persona: user.id }
+                        : eq
+                ));
+            }
 
             const cantidad = equiposParaRegistrar.length;
             alert(`${cantidad} ${cantidad === 1 ? "movimiento registrado" : "movimientos registrados"} con éxito.`);
             setData({ tipo_movimiento: "", id_ubicacion: "" });
-            setEquipoInput({ id_equipo: "", observaciones: "" });
+            setEquipoInput({ id_equipo: "", estado: "operativo", observaciones: "" });
             setEquiposAgregados([]);
 
         } catch (error) {
@@ -227,6 +273,18 @@ export const Formulario = () => {
                 label: `${eq.tipo_equipo} ${eq.marca} ${eq.modelo}`
             }));
     };
+
+    // Determinar si el movimiento actual es Ingreso (habilita el selector de estado)
+    const esIngreso = data.tipo_movimiento === "Ingreso";
+
+    // Opciones para el selector de estado recogidas de la columna 'estado' de inventarioequipos
+    const estadosEnBD = Array.from(new Set(equipos.map(eq => eq.estado).filter(Boolean)));
+    const estadosEnumBase = ["operativo", "dañado", "incompleto", "robado"];
+    const listaEstados = Array.from(new Set([...estadosEnBD, ...estadosEnumBase]));
+    const opcionesEstado = listaEstados.map(est => ({
+        value: est,
+        label: est.charAt(0).toUpperCase() + est.slice(1)
+    }));
 
     // Placeholder dinámico para el selector de equipo
     let placeholderEquipo = "Seleccione equipo...";
@@ -297,10 +355,23 @@ export const Formulario = () => {
                 <SelectInput
                     name="id_equipo_principal"
                     value={equipoInput.id_equipo}
-                    onChange={(e) => setEquipoInput(prev => ({ ...prev, id_equipo: e.target.value }))}
+                    onChange={(e) => {
+                        const idSel = e.target.value;
+                        const eqObj = equipos.find(eq => eq.id_equipo.toString() === idSel.toString());
+                        setEquipoInput(prev => ({
+                            ...prev,
+                            id_equipo: idSel,
+                            estado: eqObj?.estado || prev.estado || "operativo"
+                        }));
+                    }}
                     opciones={opcionesParaPrimerComponente}
                     disabled={equiposBloqueado || (opcionesParaPrimerComponente.length === 0 && equiposAgregados.length > 0)}
                     placeholder={placeholderPrimerComponente}
+                    mostrarEstado={esIngreso}
+                    labelEstado="Estado:"
+                    estado={equipoInput.estado || "operativo"}
+                    onEstadoChange={(e) => setEquipoInput(prev => ({ ...prev, estado: e.target.value }))}
+                    opcionesEstado={opcionesEstado}
                     mostrarObservaciones={true}
                     labelObservaciones="Observaciones (Opcional):"
                     observaciones={equipoInput.observaciones}
@@ -326,10 +397,22 @@ export const Formulario = () => {
                                 key={index}
                                 name={`id_equipo_agregado_${index}`}
                                 value={item.id_equipo}
-                                onChange={(e) => handleAgregadoChange(index, "id_equipo", e.target.value)}
+                                onChange={(e) => {
+                                    const idSel = e.target.value;
+                                    const eqObj = equipos.find(eq => eq.id_equipo.toString() === idSel.toString());
+                                    handleAgregadoChange(index, "id_equipo", idSel);
+                                    if (eqObj?.estado) {
+                                        handleAgregadoChange(index, "estado", eqObj.estado);
+                                    }
+                                }}
                                 opciones={getOpcionesParaAgregado(index)}
                                 disabled={equiposBloqueado}
                                 placeholder="Equipo seleccionado"
+                                mostrarEstado={esIngreso}
+                                labelEstado="Estado:"
+                                estado={item.estado || "operativo"}
+                                onEstadoChange={(e) => handleAgregadoChange(index, "estado", e.target.value)}
+                                opcionesEstado={opcionesEstado}
                                 mostrarObservaciones={true}
                                 labelObservaciones={`Observaciones (Equipo #${index + 1}):`}
                                 observaciones={item.observaciones}

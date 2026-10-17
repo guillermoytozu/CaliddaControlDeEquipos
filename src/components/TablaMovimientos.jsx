@@ -30,7 +30,7 @@ export const TablaMovimientos = () => {
                         tipo_movimiento,
                         fecha_hora,
                         persona ( nombre ),
-                        estado,
+                        estado:estado_historico,
                         observaciones,
                         inventarioequipos ( tipo_equipo, marca, modelo, numero_serie ),
                         ubicaciones ( ubicacion )
