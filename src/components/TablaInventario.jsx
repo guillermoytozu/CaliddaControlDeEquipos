@@ -64,13 +64,13 @@ export const TablaInventario = () => {
           <tbody id="cuerpo-tabla-equipos">
             {cargando ? (
               <tr>
-                <td colSpan="4" className="tabla-mensaje-estado">
+                <td colSpan="6" className="tabla-mensaje-estado">
                   Cargando inventario...
                 </td>
               </tr>
             ) : equipos.length === 0 ? (
               <tr>
-                <td colSpan="4" className="tabla-mensaje-estado">
+                <td colSpan="6" className="tabla-mensaje-estado">
                   No hay equipos registrados
                 </td>
               </tr>

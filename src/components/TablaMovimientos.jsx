@@ -111,7 +111,7 @@ export const TablaMovimientos = () => {
           <tbody id="cuerpo-tabla-equipos">
             {cargando && (
               <tr>
-                <td colSpan="6" className="tabla-mensaje-estado">
+                <td colSpan="8" className="tabla-mensaje-estado">
                   Cargando movimientos...
                 </td>
               </tr>
@@ -127,7 +127,7 @@ export const TablaMovimientos = () => {
 
             {!cargando && !error && movimientos.length === 0 && (
               <tr>
-                <td colSpan="6" className="tabla-mensaje-estado">
+                <td colSpan="8" className="tabla-mensaje-estado">
                   No se encontraron movimientos en este rango de fechas.
                 </td>
               </tr>
