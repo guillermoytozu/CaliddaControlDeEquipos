@@ -86,6 +86,7 @@ export const TablaMovimientos = () => {
               id="fecha-fin"
               className="input-fecha"
               value={fechaFin}
+              min={fechaInicio}
               max={hoy}
               onChange={(e) => setFechaFin(e.target.value)}
             />
