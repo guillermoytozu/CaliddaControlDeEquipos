@@ -69,6 +69,9 @@ export const Formulario = () => {
         if (equipoActual.disponibilidad === true && data.tipo_movimiento === "Ingreso") {
             return alert("Error crítico: No se puede ingresar un equipo que ya figura como disponible.");
         }
+        if (data.tipo_movimiento === "Ingreso" && String(equipoActual.id_persona) !== String(user.id)) {
+            return alert("Error crítico: No se puede ingresar un equipo que no tienes asignado.");
+        }
 
         try {
             const { error: errorInsert } = await supabase
@@ -128,7 +131,7 @@ export const Formulario = () => {
     } else if (data.tipo_movimiento === "Ingreso" && data.id_ubicacion && user) {
         // En Ingreso: equipos del usuario que se ingresarán a dicha ubicación
         equiposFiltrados = equipos.filter(
-            eq => eq.disponibilidad === false && eq.id_persona === user.id
+            eq => eq.disponibilidad === false && Boolean(eq.id_persona) && String(eq.id_persona) === String(user.id)
         );
     }
 
