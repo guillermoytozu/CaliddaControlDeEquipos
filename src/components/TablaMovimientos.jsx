@@ -30,11 +30,7 @@ export const TablaMovimientos = () => {
                         tipo_movimiento,
                         fecha_hora,
                         persona ( nombre ),
-<<<<<<< HEAD
                         estado_historico,
-=======
-                        estado:estado_historico,
->>>>>>> 9c6b1762410b8233ddf9141a30a8a19dfc50de24
                         observaciones,
                         inventarioequipos ( tipo_equipo, marca, modelo, numero_serie ),
                         ubicaciones ( ubicacion )
@@ -123,7 +119,7 @@ export const TablaMovimientos = () => {
 
             {error && !cargando && (
               <tr>
-                <td colSpan="6" className="tabla-mensaje-error">
+                <td colSpan="8" className="tabla-mensaje-error">
                   Error al cargar la lista.
                 </td>
               </tr>
