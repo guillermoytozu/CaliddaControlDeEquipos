@@ -17,9 +17,14 @@ export const Formulario = () => {
         tipo_movimiento: ""
     });
 
-    const [equiposSeleccionados, setEquiposSeleccionados] = useState([
-        { id_equipo: "", observaciones: "" }
-    ]);
+    // Estado del primer componente (área de selección)
+    const [equipoInput, setEquipoInput] = useState({
+        id_equipo: "",
+        observaciones: ""
+    });
+
+    // Lista de equipos que se van agregando hacia abajo
+    const [equiposAgregados, setEquiposAgregados] = useState([]);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -36,37 +41,47 @@ export const Formulario = () => {
         const { name, value } = e.target;
         let newData = { ...data, [name]: value };
 
-        // 1. Si el usuario cambia el tipo de movimiento, limpiamos la ubicación y los equipos seleccionados
+        // 1. Si el usuario cambia el tipo de movimiento, limpiamos ubicación y equipos
         if (name === "tipo_movimiento") {
             newData.id_ubicacion = "";
-            setEquiposSeleccionados([{ id_equipo: "", observaciones: "" }]);
+            setEquipoInput({ id_equipo: "", observaciones: "" });
+            setEquiposAgregados([]);
         }
 
-        // 2. Si el usuario cambia la ubicación, limpiamos los equipos seleccionados
+        // 2. Si el usuario cambia la ubicación, limpiamos los equipos
         if (name === "id_ubicacion") {
-            setEquiposSeleccionados([{ id_equipo: "", observaciones: "" }]);
+            setEquipoInput({ id_equipo: "", observaciones: "" });
+            setEquiposAgregados([]);
         }
 
         setData(newData);
     };
 
-    const handleEquipoChange = (index, campo, valor) => {
-        setEquiposSeleccionados(prev => {
+    // Al presionar "+", el equipo seleccionado se va hacia abajo y el primer componente queda listo para otro equipo
+    const handleAgregarEquipo = () => {
+        if (!equipoInput.id_equipo) return;
+
+        setEquiposAgregados(prev => [
+            ...prev,
+            { id_equipo: equipoInput.id_equipo, observaciones: equipoInput.observaciones }
+        ]);
+
+        // Resetea el primer componente dejándolo listo para seleccionar otro equipo
+        setEquipoInput({ id_equipo: "", observaciones: "" });
+    };
+
+    // Permite eliminar un equipo de la lista de abajo
+    const handleEliminarEquipo = (indexAEliminar) => {
+        setEquiposAgregados(prev => prev.filter((_, idx) => idx !== indexAEliminar));
+    };
+
+    // Permite editar un equipo o sus observaciones en la lista de abajo
+    const handleAgregadoChange = (index, campo, valor) => {
+        setEquiposAgregados(prev => {
             const copia = [...prev];
             copia[index] = { ...copia[index], [campo]: valor };
             return copia;
         });
-    };
-
-    const agregarFilaEquipo = () => {
-        setEquiposSeleccionados(prev => [
-            ...prev,
-            { id_equipo: "", observaciones: "" }
-        ]);
-    };
-
-    const eliminarFilaEquipo = (indexAEliminar) => {
-        setEquiposSeleccionados(prev => prev.filter((_, idx) => idx !== indexAEliminar));
     };
 
     const handleSubmit = async (e) => {
@@ -77,18 +92,24 @@ export const Formulario = () => {
             return alert("Faltan datos obligatorios (Movimiento y Ubicación).");
         }
 
-        if (equiposSeleccionados.length === 0 || equiposSeleccionados.some(item => !item.id_equipo)) {
-            return alert("Debes seleccionar un equipo en cada fila agregada.");
+        // Equipos a registrar: los que están en la lista de abajo + el equipo del primer selector si seleccionó uno sin presionar "+"
+        const equiposParaRegistrar = [...equiposAgregados];
+        if (equipoInput.id_equipo) {
+            equiposParaRegistrar.push(equipoInput);
+        }
+
+        if (equiposParaRegistrar.length === 0) {
+            return alert("Debes seleccionar al menos un equipo.");
         }
 
         // Validar que no haya equipos duplicados
-        const ids = equiposSeleccionados.map(item => item.id_equipo);
+        const ids = equiposParaRegistrar.map(item => item.id_equipo);
         if (new Set(ids).size !== ids.length) {
-            return alert("No puedes seleccionar el mismo equipo más de una vez.");
+            return alert("No puedes registrar el mismo equipo más de una vez.");
         }
 
         // Validaciones individuales para cada equipo
-        for (const item of equiposSeleccionados) {
+        for (const item of equiposParaRegistrar) {
             const equipoActual = equipos.find(eq => eq.id_equipo.toString() === item.id_equipo);
 
             if (!equipoActual) {
@@ -108,7 +129,7 @@ export const Formulario = () => {
 
         try {
             // 1. Inserción de movimientos para cada equipo
-            const movimientosAInsertar = equiposSeleccionados.map(item => ({
+            const movimientosAInsertar = equiposParaRegistrar.map(item => ({
                 id_persona: user.id,
                 id_equipo: parseInt(item.id_equipo),
                 id_ubicacion: parseInt(data.id_ubicacion),
@@ -125,7 +146,7 @@ export const Formulario = () => {
             // 2. Actualización de inventarioequipos para todos los equipos seleccionados
             const nuevaDisponibilidad = data.tipo_movimiento === "Ingreso" ? true : false;
             const idUsuarioActualizado = nuevaDisponibilidad ? null : user.id;
-            const idsEquiposInt = equiposSeleccionados.map(item => parseInt(item.id_equipo));
+            const idsEquiposInt = equiposParaRegistrar.map(item => parseInt(item.id_equipo));
 
             const { error: errorUpdate } = await supabase
                 .from('inventarioequipos')
@@ -145,10 +166,11 @@ export const Formulario = () => {
                     : eq
             ));
 
-            const cantidad = equiposSeleccionados.length;
+            const cantidad = equiposParaRegistrar.length;
             alert(`${cantidad} ${cantidad === 1 ? "movimiento registrado" : "movimientos registrados"} con éxito.`);
             setData({ tipo_movimiento: "", id_ubicacion: "" });
-            setEquiposSeleccionados([{ id_equipo: "", observaciones: "" }]);
+            setEquipoInput({ id_equipo: "", observaciones: "" });
+            setEquiposAgregados([]);
 
         } catch (error) {
             console.error("Error en la base de datos:", error);
@@ -176,15 +198,30 @@ export const Formulario = () => {
         );
     }
 
-    // Opciones para cada selector de equipo (excluyendo los seleccionados en otras filas)
-    const getOpcionesParaFila = (indexActual) => {
-        const idsSeleccionadosEnOtras = equiposSeleccionados
+    // IDs de equipos que ya han sido agregados abajo
+    const idsAgregados = equiposAgregados.map(item => item.id_equipo);
+
+    // Opciones para el selector superior (primer componente):
+    // Excluye los equipos que ya están en la lista de abajo
+    const opcionesParaPrimerComponente = equiposFiltrados
+        .filter(eq => !idsAgregados.includes(eq.id_equipo.toString()))
+        .map(eq => ({
+            value: eq.id_equipo,
+            label: `${eq.tipo_equipo} ${eq.marca} ${eq.modelo}`
+        }));
+
+    // Opciones para cada selector de los equipos de abajo
+    const getOpcionesParaAgregado = (indexActual) => {
+        const idsOtrosAgregados = equiposAgregados
             .filter((_, idx) => idx !== indexActual)
-            .map(item => item.id_equipo)
-            .filter(Boolean);
+            .map(item => item.id_equipo);
+
+        if (equipoInput.id_equipo) {
+            idsOtrosAgregados.push(equipoInput.id_equipo);
+        }
 
         return equiposFiltrados
-            .filter(eq => !idsSeleccionadosEnOtras.includes(eq.id_equipo.toString()))
+            .filter(eq => !idsOtrosAgregados.includes(eq.id_equipo.toString()))
             .map(eq => ({
                 value: eq.id_equipo,
                 label: `${eq.tipo_equipo} ${eq.marca} ${eq.modelo}`
@@ -205,19 +242,21 @@ export const Formulario = () => {
 
     const equiposBloqueado = !data.tipo_movimiento || !data.id_ubicacion || equiposFiltrados.length === 0;
 
-    // Validación para el botón de agregar "+":
-    const puedeAgregarFila =
-        !equiposBloqueado &&
-        !equiposSeleccionados.some(item => !item.id_equipo) &&
-        equiposSeleccionados.length < equiposFiltrados.length;
+    // Validación para el botón "+" del primer componente:
+    const puedeAgregar = !equiposBloqueado && Boolean(equipoInput.id_equipo);
 
-    let tooltipBotonAgregar = "Agregar otro equipo";
+    let tooltipBotonAgregar = "Agregar este equipo a la lista de abajo";
     if (equiposBloqueado) {
         tooltipBotonAgregar = "Seleccione movimiento y ubicación primero";
-    } else if (equiposSeleccionados.some(item => !item.id_equipo)) {
-        tooltipBotonAgregar = "Selecciona un equipo antes de agregar otro";
-    } else if (equiposSeleccionados.length >= equiposFiltrados.length) {
-        tooltipBotonAgregar = "No hay más equipos disponibles para agregar";
+    } else if (!equipoInput.id_equipo) {
+        tooltipBotonAgregar = "Selecciona un equipo primero";
+    }
+
+    let placeholderPrimerComponente = "Seleccione equipo...";
+    if (equiposBloqueado) {
+        placeholderPrimerComponente = placeholderEquipo;
+    } else if (opcionesParaPrimerComponente.length === 0 && equiposAgregados.length > 0) {
+        placeholderPrimerComponente = "Todos los equipos disponibles han sido agregados";
     }
 
     return (
@@ -254,38 +293,58 @@ export const Formulario = () => {
                     Ubicación:
                 </SelectInput>
 
-                {/* Sección de Equipos y Observaciones Dinámicas integradas en SelectInput */}
-                <div className="contenedor-equipos-dinamicos">
-                    {equiposSeleccionados.map((item, index) => {
-                        const labelEquipo = equiposSeleccionados.length === 1 ? "Equipo:" : `Equipo #${index + 1}:`;
-                        const labelObservaciones = equiposSeleccionados.length === 1 ? "Observaciones (Opcional):" : `Observaciones (Equipo #${index + 1}):`;
+                {/* 1. Primer componente SelectInput: tiene botón "+", pero NO "x" */}
+                <SelectInput
+                    name="id_equipo_principal"
+                    value={equipoInput.id_equipo}
+                    onChange={(e) => setEquipoInput(prev => ({ ...prev, id_equipo: e.target.value }))}
+                    opciones={opcionesParaPrimerComponente}
+                    disabled={equiposBloqueado || (opcionesParaPrimerComponente.length === 0 && equiposAgregados.length > 0)}
+                    placeholder={placeholderPrimerComponente}
+                    mostrarObservaciones={true}
+                    labelObservaciones="Observaciones (Opcional):"
+                    observaciones={equipoInput.observaciones}
+                    onObservacionesChange={(e) => setEquipoInput(prev => ({ ...prev, observaciones: e.target.value }))}
+                    placeholderObservaciones="Observaciones de este equipo (Opcional)"
+                    mostrarBotonAgregar={true}
+                    onAgregar={handleAgregarEquipo}
+                    disabledAgregar={!puedeAgregar}
+                    tooltipAgregar={tooltipBotonAgregar}
+                    mostrarBotonEliminar={false}
+                >
+                    Equipo:
+                </SelectInput>
 
-                        return (
+                {/* 2. Elementos que se van hacia abajo: tienen botón "x", pero NO "+" */}
+                {equiposAgregados.length > 0 && (
+                    <div className="contenedor-equipos-agregados">
+                        <div className="equipos-agregados-titulo">
+                            <span>Equipos en la lista ({equiposAgregados.length}):</span>
+                        </div>
+                        {equiposAgregados.map((item, index) => (
                             <SelectInput
                                 key={index}
-                                name={`id_equipo_${index}`}
+                                name={`id_equipo_agregado_${index}`}
                                 value={item.id_equipo}
-                                onChange={(e) => handleEquipoChange(index, "id_equipo", e.target.value)}
-                                opciones={getOpcionesParaFila(index)}
+                                onChange={(e) => handleAgregadoChange(index, "id_equipo", e.target.value)}
+                                opciones={getOpcionesParaAgregado(index)}
                                 disabled={equiposBloqueado}
-                                placeholder={placeholderEquipo}
+                                placeholder="Equipo seleccionado"
                                 mostrarObservaciones={true}
-                                labelObservaciones={labelObservaciones}
+                                labelObservaciones={`Observaciones (Equipo #${index + 1}):`}
                                 observaciones={item.observaciones}
-                                onObservacionesChange={(e) => handleEquipoChange(index, "observaciones", e.target.value)}
+                                onObservacionesChange={(e) => handleAgregadoChange(index, "observaciones", e.target.value)}
                                 placeholderObservaciones="Observaciones de este equipo (Opcional)"
-                                mostrarBotonAgregar={true}
-                                onAgregar={agregarFilaEquipo}
-                                disabledAgregar={!puedeAgregarFila}
-                                tooltipAgregar={tooltipBotonAgregar}
-                                mostrarBotonEliminar={equiposSeleccionados.length > 1}
-                                onEliminar={() => eliminarFilaEquipo(index)}
+                                mostrarBotonAgregar={false}
+                                mostrarBotonEliminar={true}
+                                onEliminar={() => handleEliminarEquipo(index)}
+                                tooltipEliminar="Quitar de la lista"
                             >
-                                {labelEquipo}
+                                {`Equipo #${index + 1}:`}
                             </SelectInput>
-                        );
-                    })}
-                </div>
+                        ))}
+                    </div>
+                )}
 
                 <BotonFormulario className="boton-formulario">Registrar Movimiento</BotonFormulario>
             </form>
