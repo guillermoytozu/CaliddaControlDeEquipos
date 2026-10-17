@@ -30,7 +30,7 @@ export const TablaMovimientos = () => {
                         tipo_movimiento,
                         fecha_hora,
                         persona ( nombre ),
-                        estado,
+                        estado_historico,
                         observaciones,
                         inventarioequipos ( tipo_equipo, marca, modelo, numero_serie ),
                         ubicaciones ( ubicacion )
@@ -163,7 +163,7 @@ export const TablaMovimientos = () => {
                       {dato.ubicaciones?.ubicacion || "Ubicación desconocida"}
                     </td>
                     <td>{equipoString}</td>
-                    <td>{dato.estado}</td>
+                    <td>{dato.estado_historico}</td>
                     <td>{dato.observaciones}</td>
                     <td>
                       <span className={`badge-movimiento ${claseMovimiento}`}>
