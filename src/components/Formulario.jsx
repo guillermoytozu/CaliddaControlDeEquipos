@@ -2,13 +2,13 @@ import { TextInput } from "./TextInput";
 import { SelectInput } from "./SelectInput";
 import { RadioButton } from "./RadioButton";
 import { BotonFormulario } from "./BotonFormulario";
-import { useState, useContext, useEffect } from "react";
-import { AuthContext } from '../context/AuthContext';
+import { useState, useEffect } from "react";
+import { useAuth } from "../context/AuthContext";
 import { supabase } from '../supabase/supabaseClient';
 import './Formulario.css';
 
 export const Formulario = () => {
-    const { user } = useContext(AuthContext);
+    const { user } = useAuth();
 
     const [equipos, setEquipos] = useState([]);
     const [ubicaciones, setUbicaciones] = useState([]);
