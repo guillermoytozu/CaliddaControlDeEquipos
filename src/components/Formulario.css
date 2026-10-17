@@ -80,3 +80,92 @@
         padding: 0.7rem 1rem;
     }
 }
+
+/* Contenedor de lista de equipos dinámicos */
+.contenedor-equipos-dinamicos {
+    display: flex;
+    flex-direction: column;
+    gap: 1.1rem;
+    width: 100%;
+}
+
+.item-equipo-dinamico {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 0.9rem;
+    background-color: var(--color-gris-2);
+    border: 1.5px solid var(--color-gris-4);
+    border-radius: var(--border-radius);
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.item-equipo-dinamico:focus-within {
+    border-color: rgba(0, 161, 222, 0.45);
+    box-shadow: var(--shadow-sm);
+}
+
+.fila-equipo-select {
+    display: flex;
+    align-items: flex-end;
+    gap: 0.5rem;
+    width: 100%;
+}
+
+.fila-equipo-select-control {
+    flex: 1;
+    min-width: 0;
+}
+
+.acciones-equipo-fila {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.btn-accion-equipo {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    min-height: 44px;
+    border-radius: var(--border-radius);
+    font-size: 1.3rem;
+    font-weight: 700;
+    line-height: 1;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    border: none;
+    user-select: none;
+}
+
+.btn-agregar-equipo {
+    background-color: var(--color-calidda);
+    color: #ffffff;
+}
+
+.btn-agregar-equipo:hover:not(:disabled) {
+    background-color: var(--color-calidda-dark);
+    transform: translateY(-1px);
+}
+
+.btn-agregar-equipo:disabled {
+    background-color: var(--color-gris-4);
+    color: var(--color-gris-3);
+    cursor: not-allowed;
+    opacity: 0.65;
+}
+
+.btn-eliminar-equipo {
+    background-color: var(--color-rojo-light);
+    color: var(--color-rojo);
+    border: 1.5px solid rgba(229, 62, 62, 0.35);
+}
+
+.btn-eliminar-equipo:hover {
+    background-color: var(--color-rojo);
+    color: #ffffff;
+    border-color: var(--color-rojo);
+    transform: translateY(-1px);
+}

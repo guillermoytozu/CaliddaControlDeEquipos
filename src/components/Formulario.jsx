@@ -14,11 +14,13 @@ export const Formulario = () => {
     const [ubicaciones, setUbicaciones] = useState([]);
 
     const [data, setData] = useState({
-        id_equipo: "",
         id_ubicacion: "",
-        observaciones: "",
         tipo_movimiento: ""
     });
+
+    const [equiposSeleccionados, setEquiposSeleccionados] = useState([
+        { id_equipo: "", observaciones: "" }
+    ]);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -35,59 +37,96 @@ export const Formulario = () => {
         const { name, value } = e.target;
         let newData = { ...data, [name]: value };
 
-        // 1. Si el usuario cambia el tipo de movimiento, limpiamos la ubicación y el equipo seleccionados
+        // 1. Si el usuario cambia el tipo de movimiento, limpiamos la ubicación y los equipos seleccionados
         if (name === "tipo_movimiento") {
             newData.id_ubicacion = "";
-            newData.id_equipo = "";
+            setEquiposSeleccionados([{ id_equipo: "", observaciones: "" }]);
         }
 
-        // 2. Si el usuario cambia la ubicación, limpiamos el equipo seleccionado
+        // 2. Si el usuario cambia la ubicación, limpiamos los equipos seleccionados
         if (name === "id_ubicacion") {
-            newData.id_equipo = "";
+            setEquiposSeleccionados([{ id_equipo: "", observaciones: "" }]);
         }
 
         setData(newData);
+    };
+
+    const handleEquipoChange = (index, campo, valor) => {
+        setEquiposSeleccionados(prev => {
+            const copia = [...prev];
+            copia[index] = { ...copia[index], [campo]: valor };
+            return copia;
+        });
+    };
+
+    const agregarFilaEquipo = () => {
+        setEquiposSeleccionados(prev => [
+            ...prev,
+            { id_equipo: "", observaciones: "" }
+        ]);
+    };
+
+    const eliminarFilaEquipo = (indexAEliminar) => {
+        setEquiposSeleccionados(prev => prev.filter((_, idx) => idx !== indexAEliminar));
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
         if (!user) return alert("Debes iniciar sesión para registrar un movimiento.");
-        if (!data.id_equipo || !data.id_ubicacion || !data.tipo_movimiento) {
-            return alert("Faltan datos obligatorios.");
+        if (!data.tipo_movimiento || !data.id_ubicacion) {
+            return alert("Faltan datos obligatorios (Movimiento y Ubicación).");
         }
 
-        const equipoActual = equipos.find(eq => eq.id_equipo.toString() === data.id_equipo);
-
-        if (!equipoActual) {
-            return alert("Equipo no encontrado.");
+        if (equiposSeleccionados.length === 0 || equiposSeleccionados.some(item => !item.id_equipo)) {
+            return alert("Debes seleccionar un equipo en cada fila agregada.");
         }
 
-        if (equipoActual.disponibilidad === false && data.tipo_movimiento === "Salida") {
-            return alert("Error crítico: No se puede dar salida a un equipo que no está disponible.");
+        // Validar que no haya equipos duplicados
+        const ids = equiposSeleccionados.map(item => item.id_equipo);
+        if (new Set(ids).size !== ids.length) {
+            return alert("No puedes seleccionar el mismo equipo más de una vez.");
         }
-        if (equipoActual.disponibilidad === true && data.tipo_movimiento === "Ingreso") {
-            return alert("Error crítico: No se puede ingresar un equipo que ya figura como disponible.");
-        }
-        if (data.tipo_movimiento === "Ingreso" && String(equipoActual.id_persona) !== String(user.id)) {
-            return alert("Error crítico: No se puede ingresar un equipo que no tienes asignado.");
+
+        // Validaciones individuales para cada equipo
+        for (const item of equiposSeleccionados) {
+            const equipoActual = equipos.find(eq => eq.id_equipo.toString() === item.id_equipo);
+
+            if (!equipoActual) {
+                return alert("Uno de los equipos seleccionados no fue encontrado en la base de datos.");
+            }
+
+            if (equipoActual.disponibilidad === false && data.tipo_movimiento === "Salida") {
+                return alert(`Error crítico: El equipo "${equipoActual.tipo_equipo} ${equipoActual.marca}" ya no está disponible.`);
+            }
+            if (equipoActual.disponibilidad === true && data.tipo_movimiento === "Ingreso") {
+                return alert(`Error crítico: El equipo "${equipoActual.tipo_equipo} ${equipoActual.marca}" ya figura como disponible.`);
+            }
+            if (data.tipo_movimiento === "Ingreso" && String(equipoActual.id_persona) !== String(user.id)) {
+                return alert(`Error crítico: No puedes ingresar el equipo "${equipoActual.tipo_equipo} ${equipoActual.marca}" porque no te pertenece.`);
+            }
         }
 
         try {
+            // 1. Inserción de movimientos para cada equipo
+            const movimientosAInsertar = equiposSeleccionados.map(item => ({
+                id_persona: user.id,
+                id_equipo: parseInt(item.id_equipo),
+                id_ubicacion: parseInt(data.id_ubicacion),
+                tipo_movimiento: data.tipo_movimiento,
+                observaciones: item.observaciones ? item.observaciones.trim() : ""
+            }));
+
             const { error: errorInsert } = await supabase
                 .from('movimientos')
-                .insert([{
-                    id_persona: user.id,
-                    id_equipo: parseInt(data.id_equipo),
-                    id_ubicacion: parseInt(data.id_ubicacion),
-                    tipo_movimiento: data.tipo_movimiento,
-                    observaciones: data.observaciones
-                }]);
+                .insert(movimientosAInsertar);
 
             if (errorInsert) throw errorInsert;
 
+            // 2. Actualización de inventarioequipos para todos los equipos seleccionados
             const nuevaDisponibilidad = data.tipo_movimiento === "Ingreso" ? true : false;
             const idUsuarioActualizado = nuevaDisponibilidad ? null : user.id;
+            const idsEquiposInt = equiposSeleccionados.map(item => parseInt(item.id_equipo));
 
             const { error: errorUpdate } = await supabase
                 .from('inventarioequipos')
@@ -96,18 +135,21 @@ export const Formulario = () => {
                     id_ubicacion: parseInt(data.id_ubicacion),
                     id_persona: idUsuarioActualizado
                 })
-                .eq('id_equipo', parseInt(data.id_equipo));
+                .in('id_equipo', idsEquiposInt);
 
             if (errorUpdate) throw errorUpdate;
 
+            // 3. Actualizar estado local
             setEquipos(equipos.map(eq =>
-                eq.id_equipo.toString() === data.id_equipo
+                idsEquiposInt.includes(eq.id_equipo)
                     ? { ...eq, disponibilidad: nuevaDisponibilidad, id_ubicacion: parseInt(data.id_ubicacion), id_persona: idUsuarioActualizado }
                     : eq
             ));
 
-            alert("Movimiento registrado con éxito.");
-            setData({ ...data, observaciones: "", tipo_movimiento: "", id_equipo: "", id_ubicacion: "" });
+            const cantidad = equiposSeleccionados.length;
+            alert(`${cantidad} ${cantidad === 1 ? "movimiento registrado" : "movimientos registrados"} con éxito.`);
+            setData({ tipo_movimiento: "", id_ubicacion: "" });
+            setEquiposSeleccionados([{ id_equipo: "", observaciones: "" }]);
 
         } catch (error) {
             console.error("Error en la base de datos:", error);
@@ -135,6 +177,21 @@ export const Formulario = () => {
         );
     }
 
+    // Opciones para cada selector de equipo (excluyendo los seleccionados en otras filas)
+    const getOpcionesParaFila = (indexActual) => {
+        const idsSeleccionadosEnOtras = equiposSeleccionados
+            .filter((_, idx) => idx !== indexActual)
+            .map(item => item.id_equipo)
+            .filter(Boolean);
+
+        return equiposFiltrados
+            .filter(eq => !idsSeleccionadosEnOtras.includes(eq.id_equipo.toString()))
+            .map(eq => ({
+                value: eq.id_equipo,
+                label: `${eq.tipo_equipo} ${eq.marca} ${eq.modelo}`
+            }));
+    };
+
     // Placeholder dinámico para el selector de equipo
     let placeholderEquipo = "Seleccione equipo...";
     if (!data.tipo_movimiento) {
@@ -148,6 +205,21 @@ export const Formulario = () => {
     }
 
     const equiposBloqueado = !data.tipo_movimiento || !data.id_ubicacion || equiposFiltrados.length === 0;
+
+    // Validación para el botón de agregar "+":
+    const puedeAgregarFila =
+        !equiposBloqueado &&
+        !equiposSeleccionados.some(item => !item.id_equipo) &&
+        equiposSeleccionados.length < equiposFiltrados.length;
+
+    let tooltipBotonAgregar = "Agregar otro equipo";
+    if (equiposBloqueado) {
+        tooltipBotonAgregar = "Seleccione movimiento y ubicación primero";
+    } else if (equiposSeleccionados.some(item => !item.id_equipo)) {
+        tooltipBotonAgregar = "Selecciona un equipo antes de agregar otro";
+    } else if (equiposSeleccionados.length >= equiposFiltrados.length) {
+        tooltipBotonAgregar = "No hay más equipos disponibles para agregar";
+    }
 
     return (
         <div className="formulario-container">
@@ -163,7 +235,6 @@ export const Formulario = () => {
                     </span>
                 </div>
 
-                {/* Paso 1: Tipo de movimiento */}
                 <RadioButton
                     name="tipo_movimiento"
                     value={data.tipo_movimiento}
@@ -173,7 +244,6 @@ export const Formulario = () => {
                     Movimiento:
                 </RadioButton>
 
-                {/* Paso 2: El tipo de movimiento desbloquea la ubicación */}
                 <SelectInput
                     name="id_ubicacion"
                     value={data.id_ubicacion}
@@ -185,28 +255,67 @@ export const Formulario = () => {
                     Ubicación:
                 </SelectInput>
 
-                {/* Paso 3: La ubicación desbloquea los equipos (filtrados por la ubicación seleccionada) */}
-                <SelectInput
-                    name="id_equipo"
-                    value={data.id_equipo}
-                    onChange={handleChange}
-                    opciones={equiposFiltrados.map(eq => ({ value: eq.id_equipo, label: `${eq.tipo_equipo} ${eq.marca} ${eq.modelo}` }))}
-                    disabled={equiposBloqueado}
-                    placeholder={placeholderEquipo}
-                >
-                    Equipo:
-                </SelectInput>
+                {/* Sección de Equipos y Observaciones Dinámicas */}
+                <div className="contenedor-equipos-dinamicos">
+                    {equiposSeleccionados.map((item, index) => {
+                        const labelEquipo = equiposSeleccionados.length === 1 ? "Equipo:" : `Equipo #${index + 1}:`;
+                        const labelObservaciones = equiposSeleccionados.length === 1 ? "Observaciones:" : `Observaciones (Equipo #${index + 1}):`;
 
+                        return (
+                            <div key={index} className="item-equipo-dinamico">
+                                <div className="fila-equipo-select">
+                                    <div className="fila-equipo-select-control">
+                                        <SelectInput
+                                            name={`id_equipo_${index}`}
+                                            value={item.id_equipo}
+                                            onChange={(e) => handleEquipoChange(index, "id_equipo", e.target.value)}
+                                            opciones={getOpcionesParaFila(index)}
+                                            disabled={equiposBloqueado}
+                                            placeholder={placeholderEquipo}
+                                        >
+                                            {labelEquipo}
+                                        </SelectInput>
+                                    </div>
 
-                <TextInput
-                    name="observaciones"
-                    id="observaciones"
-                    value={data.observaciones}
-                    onChange={handleChange}
-                    placeholder="Observaciones (Opcional)"
-                >
-                    Observaciones:
-                </TextInput>
+                                    <div className="acciones-equipo-fila">
+                                        <button
+                                            type="button"
+                                            className="btn-accion-equipo btn-agregar-equipo"
+                                            onClick={agregarFilaEquipo}
+                                            disabled={!puedeAgregarFila}
+                                            title={tooltipBotonAgregar}
+                                            aria-label="Agregar otro equipo"
+                                        >
+                                            +
+                                        </button>
+
+                                        {equiposSeleccionados.length > 1 && (
+                                            <button
+                                                type="button"
+                                                className="btn-accion-equipo btn-eliminar-equipo"
+                                                onClick={() => eliminarFilaEquipo(index)}
+                                                title="Eliminar este equipo"
+                                                aria-label="Eliminar este equipo"
+                                            >
+                                                ✕
+                                            </button>
+                                        )}
+                                    </div>
+                                </div>
+
+                                <TextInput
+                                    name={`observaciones_${index}`}
+                                    id={`observaciones_${index}`}
+                                    value={item.observaciones}
+                                    onChange={(e) => handleEquipoChange(index, "observaciones", e.target.value)}
+                                    placeholder="Observaciones de este equipo (Opcional)"
+                                >
+                                    {labelObservaciones}
+                                </TextInput>
+                            </div>
+                        );
+                    })}
+                </div>
 
                 <BotonFormulario className="boton-formulario">Registrar Movimiento</BotonFormulario>
             </form>
