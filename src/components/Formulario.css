@@ -94,9 +94,6 @@
     flex-direction: column;
     gap: 1rem;
     width: 100%;
-    margin-top: 0.25rem;
-    padding-top: 1rem;
-    border-top: 1.5px dashed var(--color-gris-4);
 }
 
 .equipos-agregados-titulo {
@@ -108,4 +105,23 @@
     color: var(--color-texto-muted);
     text-align: left;
     padding-left: 0.2rem;
+}
+
+.equipo-adicional-fila {
+    width: 100%;
+}
+
+.contenedor-boton-agregar-adicional {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    margin-top: 0.15rem;
+    padding-left: 0.2rem;
+}
+
+.texto-agregar-equipo {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--color-calidda-dark);
+    user-select: none;
 }

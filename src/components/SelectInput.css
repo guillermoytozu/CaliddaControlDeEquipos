@@ -63,6 +63,101 @@
     cursor: not-allowed;
 }
 
+/* Selector con Búsqueda Integrada */
+.select-buscable-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.select-buscable-wrapper.abierto {
+    z-index: 50;
+}
+
+.select-buscable-control-wrapper {
+    position: relative;
+    width: 100%;
+    display: flex;
+    align-items: center;
+}
+
+.select-buscable-input {
+    background-image: none;
+    padding-right: 2.4rem;
+    cursor: text;
+}
+
+.select-buscable-chevron {
+    position: absolute;
+    right: 0.85rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: #64748b;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    transition: transform var(--transition-fast), color var(--transition-fast);
+}
+
+.select-buscable-chevron.abierto {
+    transform: translateY(-50%) rotate(180deg);
+    color: var(--color-calidda);
+}
+
+.select-buscable-chevron:disabled {
+    cursor: not-allowed;
+    color: var(--color-gris-3);
+}
+
+.select-buscable-dropdown {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    max-height: 220px;
+    overflow-y: auto;
+    background-color: #ffffff;
+    border: 1.5px solid var(--color-gris-4);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-md);
+    list-style: none;
+    margin: 0;
+    padding: 0.35rem 0;
+    z-index: 100;
+}
+
+.select-buscable-option {
+    padding: 0.65rem 0.9rem;
+    font-size: 0.95rem;
+    color: var(--color-texto);
+    cursor: pointer;
+    transition: background-color var(--transition-fast), color var(--transition-fast);
+    text-align: left;
+}
+
+.select-buscable-option:hover,
+.select-buscable-option.resaltado {
+    background-color: var(--color-gris-5);
+    color: var(--color-calidda-dark);
+}
+
+.select-buscable-option.seleccionado {
+    background-color: var(--color-calidda-light);
+    color: var(--color-calidda-dark);
+    font-weight: 700;
+}
+
+.select-buscable-option-vacia {
+    padding: 0.85rem 0.9rem;
+    font-size: 0.9rem;
+    color: var(--color-gris-1);
+    text-align: center;
+    font-style: italic;
+}
+
 /* Fila interactiva para el select y los botones de acción (+ / x) */
 .select-row-wrapper {
     display: flex;

@@ -17,14 +17,14 @@ export const Formulario = () => {
     tipo_movimiento: "",
   });
 
-  // Estado del primer componente (área de selección)
+  // Estado del selector principal de equipo
   const [equipoInput, setEquipoInput] = useState({
     id_equipo: "",
     estado: "operativo",
     observaciones: "",
   });
 
-  // Lista de equipos que se van agregando hacia abajo
+  // Lista de equipos adicionales que se muestran debajo
   const [equiposAgregados, setEquiposAgregados] = useState([]);
 
   const [estadosEnum, setEstadosEnum] = useState([]);
@@ -68,31 +68,36 @@ export const Formulario = () => {
     setData(newData);
   };
 
-  // Al presionar "+", el equipo seleccionado se va hacia abajo y el primer componente queda listo para otro equipo
-  const handleAgregarEquipo = () => {
-    if (!equipoInput.id_equipo) return;
+  // Crea un nuevo div de equipo adicional vacío
+  const handleAgregarEquipoVacio = () => {
+    if (!puedeAgregarAdicional) return;
 
     setEquiposAgregados((prev) => [
       ...prev,
       {
-        id_equipo: equipoInput.id_equipo,
-        estado: equipoInput.estado || "operativo",
-        observaciones: equipoInput.observaciones,
+        id_equipo: "",
+        estado: "operativo",
+        observaciones: "",
       },
     ]);
-
-    // Resetea el primer componente dejándolo listo para seleccionar otro equipo
-    setEquipoInput({ id_equipo: "", estado: "operativo", observaciones: "" });
   };
 
-  // Permite eliminar un equipo de la lista de abajo
+  // Permite eliminar un equipo adicional de la lista
   const handleEliminarEquipo = (indexAEliminar) => {
     setEquiposAgregados((prev) =>
       prev.filter((_, idx) => idx !== indexAEliminar),
     );
   };
 
-  // Permite editar un equipo o sus observaciones/estado en la lista de abajo
+  const handleEliminarPrincipal = () => {
+    if (equiposAgregados.length > 0) {
+      const [primero, ...resto] = equiposAgregados;
+      setEquipoInput(primero);
+      setEquiposAgregados(resto);
+    }
+  };
+
+  // Permite editar un equipo adicional (equipo, estado u observaciones)
   const handleAgregadoChange = (index, campo, valor) => {
     setEquiposAgregados((prev) => {
       const copia = [...prev];
@@ -110,14 +115,26 @@ export const Formulario = () => {
       return alert("Faltan datos obligatorios (Movimiento y Ubicación).");
     }
 
-    // Equipos a registrar: los que están en la lista de abajo + el equipo del primer selector si seleccionó uno sin presionar "+"
-    const equiposParaRegistrar = [...equiposAgregados];
+    // Equipos a registrar: el principal + los adicionales que tengan equipo elegido
+    const equiposParaRegistrar = [];
     if (equipoInput.id_equipo) {
       equiposParaRegistrar.push(equipoInput);
+    }
+    for (const item of equiposAgregados) {
+      if (item.id_equipo) {
+        equiposParaRegistrar.push(item);
+      }
     }
 
     if (equiposParaRegistrar.length === 0) {
       return alert("Debes seleccionar al menos un equipo.");
+    }
+
+    // Validar que si se agregó un div adicional, tenga un equipo seleccionado
+    if (equiposAgregados.some((item) => !item.id_equipo)) {
+      return alert(
+        "Debes seleccionar un equipo en todas las filas adicionales agregadas o eliminarlas.",
+      );
     }
 
     // Validar que no haya equipos duplicados
@@ -129,7 +146,7 @@ export const Formulario = () => {
     // Validaciones individuales para cada equipo
     for (const item of equiposParaRegistrar) {
       const equipoActual = equipos.find(
-        (eq) => eq.id_equipo.toString() === item.id_equipo,
+        (eq) => eq.id_equipo.toString() === item.id_equipo.toString(),
       );
 
       if (!equipoActual) {
@@ -162,6 +179,15 @@ export const Formulario = () => {
           `Error crítico: No puedes ingresar el equipo "${equipoActual.tipo_equipo} ${equipoActual.marca}" porque no te pertenece.`,
         );
       }
+    }
+
+    // 3. Confirmación tras pasar todas las validaciones
+    const cantidad = equiposParaRegistrar.length;
+    const confirmado = window.confirm(
+      `¿Estás seguro de registrar este movimiento de ${cantidad} equipo(s)?`,
+    );
+    if (!confirmado) {
+      return;
     }
 
     const esIngreso = data.tipo_movimiento === "Ingreso";
@@ -259,7 +285,6 @@ export const Formulario = () => {
         );
       }
 
-      const cantidad = equiposParaRegistrar.length;
       alert(
         `${cantidad} ${cantidad === 1 ? "movimiento registrado" : "movimientos registrados"} con éxito.`,
       );
@@ -281,14 +306,12 @@ export const Formulario = () => {
   // Lógica de filtrado de equipos: la ubicación desbloquea y filtra los equipos
   let equiposFiltrados = [];
   if (data.tipo_movimiento === "Salida" && data.id_ubicacion) {
-    // En Salida: solo equipos disponibles en la ubicación seleccionada
     equiposFiltrados = equipos.filter(
       (eq) =>
         eq.disponibilidad === true &&
         eq.id_ubicacion?.toString() === data.id_ubicacion.toString(),
     );
   } else if (data.tipo_movimiento === "Ingreso" && data.id_ubicacion && user) {
-    // En Ingreso: equipos del usuario que se ingresarán a dicha ubicación
     equiposFiltrados = equipos.filter(
       (eq) =>
         eq.disponibilidad === false &&
@@ -297,82 +320,95 @@ export const Formulario = () => {
     );
   }
 
-  // IDs de equipos que ya han sido agregados abajo
-  const idsAgregados = equiposAgregados.map((item) => item.id_equipo);
+  // IDs de equipos seleccionados en los selectores adicionales
+  const idsEnAdicionales = equiposAgregados
+    .map((item) => item.id_equipo)
+    .filter(Boolean)
+    .map(String);
 
-  // Opciones para el selector superior (primer componente):
-  // Excluye los equipos que ya están en la lista de abajo
+  // Opciones para el selector principal: excluye equipos seleccionados en los adicionales
   const opcionesParaPrimerComponente = equiposFiltrados
-    .filter((eq) => !idsAgregados.includes(eq.id_equipo.toString()))
+    .filter((eq) => !idsEnAdicionales.includes(eq.id_equipo.toString()))
     .map((eq) => ({
       value: eq.id_equipo,
-      label: `${eq.tipo_equipo} ${eq.marca} ${eq.modelo}`,
+      label: `${eq.tipo_equipo} ${eq.marca} ${eq.modelo}${eq.numero_serie ? ` - NS ${eq.numero_serie}` : ""}`,
     }));
 
-  // Opciones para cada selector de los equipos de abajo
+  // Opciones para cada selector adicional: excluye el equipo principal y los de otros adicionales
   const getOpcionesParaAgregado = (indexActual) => {
-    const idsOtrosAgregados = equiposAgregados
-      .filter((_, idx) => idx !== indexActual)
-      .map((item) => item.id_equipo);
-
+    const idsOtros = [];
     if (equipoInput.id_equipo) {
-      idsOtrosAgregados.push(equipoInput.id_equipo);
+      idsOtros.push(equipoInput.id_equipo.toString());
     }
+    equiposAgregados.forEach((item, idx) => {
+      if (idx !== indexActual && item.id_equipo) {
+        idsOtros.push(item.id_equipo.toString());
+      }
+    });
 
     return equiposFiltrados
-      .filter((eq) => !idsOtrosAgregados.includes(eq.id_equipo.toString()))
+      .filter((eq) => !idsOtros.includes(eq.id_equipo.toString()))
       .map((eq) => ({
         value: eq.id_equipo,
-        label: `${eq.tipo_equipo} ${eq.marca} ${eq.modelo}`,
+        label: `${eq.tipo_equipo} ${eq.marca} ${eq.modelo}${eq.numero_serie ? ` - NS ${eq.numero_serie}` : ""}`,
       }));
   };
 
-  // Determinar si el movimiento actual es Ingreso (habilita el selector de estado)
+  // Determinar si el movimiento actual es Ingreso
   const esIngreso = data.tipo_movimiento === "Ingreso";
 
-  // Opciones para el selector de estado recogidas del Enumerated Type estado_equipo
+  // Opciones para el selector de estado
   const opcionesEstado = estadosEnum.map((est) => ({
     value: est,
     label: est.charAt(0).toUpperCase() + est.slice(1),
   }));
 
-  // Placeholder dinámico para el selector de equipo
-  let placeholderEquipo = "Seleccione equipo...";
-  if (!data.tipo_movimiento) {
-    placeholderEquipo = "Seleccione movimiento primero...";
-  } else if (!data.id_ubicacion) {
-    placeholderEquipo = "Seleccione ubicación primero...";
-  } else if (equiposFiltrados.length === 0) {
-    placeholderEquipo =
-      data.tipo_movimiento === "Salida"
-        ? "No hay equipos disponibles en esta ubicación"
-        : "No tienes equipos asignados para ingresar";
-  }
-
+  // Bloqueo general de equipos si no se ha completado movimiento o ubicación
   const equiposBloqueado =
     !data.tipo_movimiento ||
     !data.id_ubicacion ||
     equiposFiltrados.length === 0;
 
-  // Validación para el botón "+" del primer componente:
-  const puedeAgregar = !equiposBloqueado && Boolean(equipoInput.id_equipo);
+  // Validación para el botón "+" que agrega un nuevo div adicional
+  const ultimoAdicional =
+    equiposAgregados.length > 0
+      ? equiposAgregados[equiposAgregados.length - 1]
+      : null;
+  const ultimoTieneEquipo = ultimoAdicional
+    ? Boolean(ultimoAdicional.id_equipo)
+    : true;
+  const principalTieneEquipo = Boolean(equipoInput.id_equipo);
+  const totalSeleccionados =
+    (equipoInput.id_equipo ? 1 : 0) +
+    equiposAgregados.filter((item) => item.id_equipo).length;
+  const hayMasEquipos = totalSeleccionados < equiposFiltrados.length;
 
-  let tooltipBotonAgregar = "Agregar este equipo a la lista de abajo";
+  const puedeAgregarAdicional =
+    !equiposBloqueado &&
+    principalTieneEquipo &&
+    ultimoTieneEquipo &&
+    hayMasEquipos;
+
+  let tooltipBotonAgregar = "Agregar otro equipo";
   if (equiposBloqueado) {
     tooltipBotonAgregar = "Seleccione movimiento y ubicación primero";
-  } else if (!equipoInput.id_equipo) {
-    tooltipBotonAgregar = "Selecciona un equipo primero";
+  } else if (!principalTieneEquipo) {
+    tooltipBotonAgregar = "Selecciona el equipo principal primero";
+  } else if (!ultimoTieneEquipo) {
+    tooltipBotonAgregar = "Selecciona un equipo en la fila anterior primero";
+  } else if (!hayMasEquipos) {
+    tooltipBotonAgregar = "Todos los equipos disponibles ya han sido agregados";
   }
 
   let placeholderPrimerComponente = "Seleccione equipo...";
   if (equiposBloqueado) {
-    placeholderPrimerComponente = placeholderEquipo;
-  } else if (
-    opcionesParaPrimerComponente.length === 0 &&
-    equiposAgregados.length > 0
-  ) {
-    placeholderPrimerComponente =
-      "Todos los equipos disponibles han sido agregados";
+    placeholderPrimerComponente = !data.tipo_movimiento
+      ? "Seleccione movimiento primero..."
+      : !data.id_ubicacion
+        ? "Seleccione ubicación primero..."
+        : data.tipo_movimiento === "Salida"
+          ? "No hay equipos disponibles en esta ubicación"
+          : "No tienes equipos asignados para ingresar";
   }
 
   return (
@@ -418,7 +454,7 @@ export const Formulario = () => {
           Ubicación:
         </SelectInput>
 
-        {/* 1. Primer componente SelectInput: tiene botón "+", pero NO "x" */}
+        {/* Selector principal de equipo: permanece en su posición, sin botón "+" */}
         <SelectInput
           name="id_equipo_principal"
           value={equipoInput.id_equipo}
@@ -434,11 +470,7 @@ export const Formulario = () => {
             }));
           }}
           opciones={opcionesParaPrimerComponente}
-          disabled={
-            equiposBloqueado ||
-            (opcionesParaPrimerComponente.length === 0 &&
-              equiposAgregados.length > 0)
-          }
+          disabled={equiposBloqueado}
           placeholder={placeholderPrimerComponente}
           mostrarEstado={esIngreso}
           labelEstado="Estado:"
@@ -457,63 +489,79 @@ export const Formulario = () => {
             }))
           }
           placeholderObservaciones="Observaciones de este equipo (Opcional)"
-          mostrarBotonAgregar={true}
-          onAgregar={handleAgregarEquipo}
-          disabledAgregar={!puedeAgregar}
-          tooltipAgregar={tooltipBotonAgregar}
-          mostrarBotonEliminar={false}
+          mostrarBotonAgregar={false}
+          mostrarBotonEliminar={equiposAgregados.length > 0}
+          onEliminar={handleEliminarPrincipal}
+          tooltipEliminar="Eliminar este equipo"
         >
-          Equipo:
+          Equipo #1:
         </SelectInput>
 
-        {/* 2. Elementos que se van hacia abajo: tienen botón "x", pero NO "+" */}
+        {/* Equipos adicionales: se muestran debajo del selector principal */}
         {equiposAgregados.length > 0 && (
           <div className="contenedor-equipos-agregados">
-            <div className="equipos-agregados-titulo">
-              <span>Equipos en la lista ({equiposAgregados.length}):</span>
-            </div>
             {equiposAgregados.map((item, index) => (
-              <SelectInput
-                key={index}
-                name={`id_equipo_agregado_${index}`}
-                value={item.id_equipo}
-                onChange={(e) => {
-                  const idSel = e.target.value;
-                  const eqObj = equipos.find(
-                    (eq) => eq.id_equipo.toString() === idSel.toString(),
-                  );
-                  handleAgregadoChange(index, "id_equipo", idSel);
-                  if (eqObj?.estado) {
-                    handleAgregadoChange(index, "estado", eqObj.estado);
+              <div key={index} className="equipo-adicional-fila">
+                <SelectInput
+                  name={`id_equipo_agregado_${index}`}
+                  value={item.id_equipo}
+                  onChange={(e) => {
+                    const idSel = e.target.value;
+                    const eqObj = equipos.find(
+                      (eq) => eq.id_equipo.toString() === idSel.toString(),
+                    );
+                    handleAgregadoChange(index, "id_equipo", idSel);
+                    if (eqObj?.estado) {
+                      handleAgregadoChange(index, "estado", eqObj.estado);
+                    }
+                  }}
+                  opciones={getOpcionesParaAgregado(index)}
+                  disabled={equiposBloqueado}
+                  placeholder="Seleccione equipo adicional..."
+                  mostrarEstado={esIngreso}
+                  labelEstado="Estado:"
+                  estado={item.estado || "operativo"}
+                  onEstadoChange={(e) =>
+                    handleAgregadoChange(index, "estado", e.target.value)
                   }
-                }}
-                opciones={getOpcionesParaAgregado(index)}
-                disabled={equiposBloqueado}
-                placeholder="Equipo seleccionado"
-                mostrarEstado={esIngreso}
-                labelEstado="Estado:"
-                estado={item.estado || "operativo"}
-                onEstadoChange={(e) =>
-                  handleAgregadoChange(index, "estado", e.target.value)
-                }
-                opcionesEstado={opcionesEstado}
-                mostrarObservaciones={true}
-                labelObservaciones={`Observaciones (Equipo #${index + 1}):`}
-                observaciones={item.observaciones}
-                onObservacionesChange={(e) =>
-                  handleAgregadoChange(index, "observaciones", e.target.value)
-                }
-                placeholderObservaciones="Observaciones de este equipo (Opcional)"
-                mostrarBotonAgregar={false}
-                mostrarBotonEliminar={true}
-                onEliminar={() => handleEliminarEquipo(index)}
-                tooltipEliminar="Quitar de la lista"
-              >
-                {`Equipo #${index + 1}:`}
-              </SelectInput>
+                  opcionesEstado={opcionesEstado}
+                  mostrarObservaciones={true}
+                  labelObservaciones={`Observaciones (Equipo #${index + 2}):`}
+                  observaciones={item.observaciones}
+                  onObservacionesChange={(e) =>
+                    handleAgregadoChange(index, "observaciones", e.target.value)
+                  }
+                  placeholderObservaciones="Observaciones de este equipo (Opcional)"
+                  mostrarBotonAgregar={false}
+                  mostrarBotonEliminar={true}
+                  onEliminar={() => handleEliminarEquipo(index)}
+                  tooltipEliminar="Eliminar este equipo"
+                >
+                  {`Equipo #${index + 2}:`}
+                </SelectInput>
+              </div>
             ))}
           </div>
         )}
+
+        {/* Botón "+" para agregar un nuevo div de equipo adicional */}
+        <div className="contenedor-boton-agregar-adicional">
+          <button
+            type="button"
+            className="btn-select-accion btn-select-agregar"
+            onClick={handleAgregarEquipoVacio}
+            disabled={!puedeAgregarAdicional}
+            title={tooltipBotonAgregar}
+            aria-label="Agregar otro equipo"
+          >
+            +
+          </button>
+          <span className="texto-agregar-equipo">
+            {equiposAgregados.length === 0
+              ? "Agregar otro equipo"
+              : "Agregar otro equipo adicional"}
+          </span>
+        </div>
 
         <BotonFormulario className="boton-formulario">
           Registrar Movimiento
