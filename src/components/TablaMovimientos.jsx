@@ -255,7 +255,6 @@ export const TablaMovimientos = () => {
         <div className="tabla-titulos-container">
           <h2 className="tabla-titulo">Trazabilidad de equipos</h2>
           <p className="tabla-subtitulo">
-            Historial completo de salidas e ingresos de equipos
             {!cargando && !error && (
               <span className="tabla-contador-registros">
                 {" "}• Mostrando {datosOrdenadosYFiltrados.length} de {movimientos.length} registros
