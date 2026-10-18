@@ -1,15 +1,15 @@
-import { Footer } from './components/Footer';
-import { Navegacion } from './components/Navegacion';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { PaginaLogin } from './pages/paginaLogin';
-import { PaginaRegistro } from './pages/paginaRegistro';
-import { PaginaTrazabilidad } from './pages/PaginaTrazabilidad';
-import { PaginaInventario } from './pages/PaginaInventario';
-import { AuthProvider, useAuth } from './context/AuthContext';
-import { RutaProtegida } from './components/RutaProtegida';
-import { RutaPublica } from './components/RutaPublica';
-import logoCalidda from './IMG/logo.png';
-import './App.css';
+import { Footer } from "./components/Footer";
+import { Navegacion } from "./components/Navegacion";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { PaginaLogin } from "./pages/paginaLogin";
+import { PaginaRegistro } from "./pages/PaginaRegistro";
+import { PaginaTrazabilidad } from "./pages/PaginaTrazabilidad";
+import { PaginaInventario } from "./pages/PaginaInventario";
+import { AuthProvider, useAuth } from "./context/AuthContext";
+import { RutaProtegida } from "./components/RutaProtegida";
+import { RutaPublica } from "./components/RutaPublica";
+import logoCalidda from "./IMG/logo.png";
+import "./App.css";
 
 function AppContent() {
   const { user, loading } = useAuth();
@@ -19,7 +19,9 @@ function AppContent() {
       <header id="header" className="app-header">
         <div className="header-content">
           <img src={logoCalidda} alt="Logo Cálidda" className="header-logo" />
-          <h1 id="titulo" className="header-titulo">CONTROL DE EQUIPOS <br /> CÁLIDDA</h1>
+          <h1 id="titulo" className="header-titulo">
+            CONTROL DE EQUIPOS <br /> CÁLIDDA
+          </h1>
         </div>
       </header>
 
@@ -59,9 +61,7 @@ function AppContent() {
         )}
       </main>
 
-      <Footer año="2026">
-        Calidda - Derechos reservados
-      </Footer>
+      <Footer año="2026">Calidda - Derechos reservados</Footer>
     </div>
   );
 }
