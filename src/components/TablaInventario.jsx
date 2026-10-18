@@ -217,7 +217,6 @@ export const TablaInventario = () => {
         <div className="tabla-titulos-container">
           <h2 className="tabla-titulo">Inventario General</h2>
           <p className="tabla-subtitulo">
-            Estado y asignación de todos los equipos registrados
             {!cargando && (
               <span className="tabla-contador-registros">
                 {" "}• Mostrando {datosOrdenadosYFiltrados.length} de {equipos.length} equipos

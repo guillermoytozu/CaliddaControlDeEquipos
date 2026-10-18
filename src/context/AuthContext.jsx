@@ -1,5 +1,5 @@
 /* eslint-disable react-refresh/only-export-components */
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext, useEffect, useState, useMemo, useCallback } from 'react';
 import { supabase } from '../supabase/supabaseClient';
 
 // 1. Creamos el contexto con valores por defecto
@@ -58,7 +58,7 @@ export const AuthProvider = ({ children }) => {
     }, []);
 
     // Iniciar sesión con Google OAuth
-    const signInWithGoogle = async () => {
+    const signInWithGoogle = useCallback(async () => {
         try {
             const redirectUrl = window.location.origin + import.meta.env.BASE_URL;
             const { data, error } = await supabase.auth.signInWithOAuth({
@@ -77,10 +77,10 @@ export const AuthProvider = ({ children }) => {
             console.error('Error al iniciar sesión con Google:', error.message);
             return { data: null, error };
         }
-    };
+    }, []);
 
     // Cerrar sesión
-    const signOut = async () => {
+    const signOut = useCallback(async () => {
         try {
             const { error } = await supabase.auth.signOut();
             if (error) throw error;
@@ -91,10 +91,19 @@ export const AuthProvider = ({ children }) => {
             console.error('Error cerrando sesión:', error.message);
             return { error };
         }
-    };
+    }, []);
+
+    // Memoizamos el objeto entregado al Provider para garantizar estabilidad referencial
+    const authValue = useMemo(() => ({
+        user,
+        session,
+        loading,
+        signInWithGoogle,
+        signOut
+    }), [user, session, loading, signInWithGoogle, signOut]);
 
     return (
-        <AuthContext.Provider value={{ user, session, loading, signInWithGoogle, signOut }}>
+        <AuthContext.Provider value={authValue}>
             {children}
         </AuthContext.Provider>
     );
