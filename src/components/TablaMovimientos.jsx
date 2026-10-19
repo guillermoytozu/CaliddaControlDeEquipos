@@ -204,14 +204,14 @@ export const TablaMovimientos = () => {
     }
 
     const filasParaExcel = datosOrdenadosYFiltrados.map((item) => ({
-      "Usuario": item.usuario,
-      "Ubicación": item.ubicacion,
-      "Equipo": item.equipo,
-      "Estado": item.estado,
-      "Observaciones": item.observaciones,
-      "Movimiento": item.movimiento,
-      "Fecha": item.fecha,
-      "Hora": item.hora,
+      Usuario: item.usuario,
+      Ubicación: item.ubicacion,
+      Equipo: item.equipo,
+      Estado: item.estado,
+      Observaciones: item.observaciones,
+      Movimiento: item.movimiento,
+      Fecha: item.fecha,
+      Hora: item.hora,
     }));
 
     const worksheet = XLSX.utils.json_to_sheet(filasParaExcel);
@@ -243,7 +243,10 @@ export const TablaMovimientos = () => {
       );
     }
     return (
-      <span className="sort-icon-active" aria-label={`Orden ${orden.direccion}`}>
+      <span
+        className="sort-icon-active"
+        aria-label={`Orden ${orden.direccion}`}
+      >
         {orden.direccion === "asc" ? "▲" : "▼"}
       </span>
     );
@@ -252,52 +255,27 @@ export const TablaMovimientos = () => {
   return (
     <section id="seccion-lista" className="seccion-tabla-movimientos">
       <div className="tabla-header-area">
-        <div className="tabla-titulos-container">
-          <h2 className="tabla-titulo">Trazabilidad de equipos</h2>
-          <p className="tabla-subtitulo">
-            Historial completo de salidas e ingresos de equipos
-            {!cargando && !error && (
-              <span className="tabla-contador-registros">
-                {" "}• Mostrando {datosOrdenadosYFiltrados.length} de {movimientos.length} registros
-              </span>
+        <div className="tabla-header-top">
+          <div className="tabla-titulos-container">
+            <h2 className="tabla-titulo">Trazabilidad de equipos</h2>
+            <p className="tabla-subtitulo">
+              {!cargando && !error && (
+                <span className="tabla-contador-registros">
+                  {" "}
+                  Mostrando {datosOrdenadosYFiltrados.length} de{" "}
+                  {movimientos.length} registros
+                </span>
+              )}
+            </p>
+            {hayFiltrosActivos && (
+              <button
+                type="button"
+                className="btn-limpiar-todos-filtros"
+                onClick={limpiarTodosFiltros}
+              >
+                Limpiar filtros de columna
+              </button>
             )}
-          </p>
-          {hayFiltrosActivos && (
-            <button
-              type="button"
-              className="btn-limpiar-todos-filtros"
-              onClick={limpiarTodosFiltros}
-            >
-              Limpiar filtros de columna
-            </button>
-          )}
-        </div>
-
-        <div className="tabla-acciones-header">
-          <div className="tabla-filtros-container">
-            <div className="filtro-grupo">
-              <label htmlFor="fecha-inicio">Desde:</label>
-              <input
-                type="date"
-                id="fecha-inicio"
-                className="input-fecha"
-                value={fechaInicio}
-                max={hoy}
-                onChange={(e) => setFechaInicio(e.target.value)}
-              />
-            </div>
-            <div className="filtro-grupo">
-              <label htmlFor="fecha-fin">Hasta:</label>
-              <input
-                type="date"
-                id="fecha-fin"
-                className="input-fecha"
-                value={fechaFin}
-                min={fechaInicio}
-                max={hoy}
-                onChange={(e) => setFechaFin(e.target.value)}
-              />
-            </div>
           </div>
 
           <button
@@ -307,6 +285,7 @@ export const TablaMovimientos = () => {
             onClick={exportarAExcel}
             disabled={cargando || datosOrdenadosYFiltrados.length === 0}
             title="Descargar datos visibles en formato Excel (.xlsx)"
+            aria-label="Exportar a Excel"
           >
             <svg
               className="excel-icon"
@@ -318,8 +297,34 @@ export const TablaMovimientos = () => {
             >
               <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16h-8v-2h8v2zm0-4h-8v-2h8v2zm-3-5V3.5L18.5 9H13z" />
             </svg>
-            <span>Exportar a Excel</span>
+            <span className="btn-exportar-texto">Excel</span>
           </button>
+        </div>
+
+        <div className="tabla-filtros-container">
+          <div className="filtro-grupo">
+            <label htmlFor="fecha-inicio">De:</label>
+            <input
+              type="date"
+              id="fecha-inicio"
+              className="input-fecha"
+              value={fechaInicio}
+              max={fechaFin}
+              onChange={(e) => setFechaInicio(e.target.value)}
+            />
+          </div>
+          <div className="filtro-grupo">
+            <label htmlFor="fecha-fin">Hasta:</label>
+            <input
+              type="date"
+              id="fecha-fin"
+              className="input-fecha"
+              value={fechaFin}
+              min={fechaInicio}
+              max={hoy}
+              onChange={(e) => setFechaFin(e.target.value)}
+            />
+          </div>
         </div>
       </div>
 
@@ -419,7 +424,9 @@ export const TablaMovimientos = () => {
                     className="input-filtro-columna"
                     placeholder="Buscar..."
                     value={filtros.usuario}
-                    onChange={(e) => handleFiltroChange("usuario", e.target.value)}
+                    onChange={(e) =>
+                      handleFiltroChange("usuario", e.target.value)
+                    }
                     aria-label="Filtrar por Usuario"
                   />
                   {filtros.usuario && (
@@ -441,7 +448,9 @@ export const TablaMovimientos = () => {
                     className="input-filtro-columna"
                     placeholder="Buscar..."
                     value={filtros.ubicacion}
-                    onChange={(e) => handleFiltroChange("ubicacion", e.target.value)}
+                    onChange={(e) =>
+                      handleFiltroChange("ubicacion", e.target.value)
+                    }
                     aria-label="Filtrar por Ubicación"
                   />
                   {filtros.ubicacion && (
@@ -463,7 +472,9 @@ export const TablaMovimientos = () => {
                     className="input-filtro-columna"
                     placeholder="Buscar..."
                     value={filtros.equipo}
-                    onChange={(e) => handleFiltroChange("equipo", e.target.value)}
+                    onChange={(e) =>
+                      handleFiltroChange("equipo", e.target.value)
+                    }
                     aria-label="Filtrar por Equipo"
                   />
                   {filtros.equipo && (
@@ -485,7 +496,9 @@ export const TablaMovimientos = () => {
                     className="input-filtro-columna"
                     placeholder="Buscar..."
                     value={filtros.estado}
-                    onChange={(e) => handleFiltroChange("estado", e.target.value)}
+                    onChange={(e) =>
+                      handleFiltroChange("estado", e.target.value)
+                    }
                     aria-label="Filtrar por Estado"
                   />
                   {filtros.estado && (
@@ -555,7 +568,9 @@ export const TablaMovimientos = () => {
                     className="input-filtro-columna"
                     placeholder="Buscar..."
                     value={filtros.fecha}
-                    onChange={(e) => handleFiltroChange("fecha", e.target.value)}
+                    onChange={(e) =>
+                      handleFiltroChange("fecha", e.target.value)
+                    }
                     aria-label="Filtrar por Fecha"
                   />
                   {filtros.fecha && (

@@ -7,7 +7,7 @@
 }
 
 .app-header {
-    background-color: #ffffff;
+    background: var(--linear-gradient-vertical-2);
     border-bottom: 1px solid var(--color-gris-4);
     box-shadow: var(--shadow-sm);
     padding: 1rem 1rem;
@@ -16,7 +16,7 @@
 
 .header-content {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
     justify-content: center;
     gap: 0.75rem;
@@ -26,18 +26,13 @@
 }
 
 .header-logo {
-    width: clamp(130px, 35vw, 170px);
-    height: auto;
+    height: 50px;
     object-fit: contain;
     transition: transform var(--transition-normal);
 }
 
-.header-logo:hover {
-    transform: scale(1.02);
-}
-
 .header-titulo {
-    color: var(--color-texto);
+    color: #ffffff;
     font-size: clamp(1.15rem, 3.8vw, 1.6rem);
     font-weight: 800;
     line-height: 1.25;
@@ -49,7 +44,7 @@
     width: 100%;
     max-width: 1100px;
     margin: 0 auto;
-    padding: 1rem 0.75rem 2rem;
+    padding: 0.5rem 0.75rem 1rem;
     display: flex;
     flex-direction: column;
 }
@@ -108,7 +103,11 @@
 }
 
 @keyframes spin-auth {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
+    0% {
+        transform: rotate(0deg);
+    }
 
+    100% {
+        transform: rotate(360deg);
+    }
+}
