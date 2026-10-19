@@ -6,12 +6,14 @@
     flex-direction: column;
 }
 
-.tabla-header-area {
+.tabla-header-area1 {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     gap: 0.75rem;
     margin-bottom: 1rem;
     text-align: left;
+    align-items: center;
+    justify-content: space-between;
 }
 
 .tabla-titulos-container {
@@ -229,12 +231,29 @@
 }
 
 /* Anchos mínimos por columna para visualización armónica */
-.col-inv-equipo { min-width: 180px; }
-.col-inv-estado { min-width: 95px; }
-.col-inv-detalle { min-width: 130px; }
-.col-inv-disponibilidad { min-width: 110px; }
-.col-inv-ubicacion { min-width: 125px; }
-.col-inv-usuario { min-width: 130px; }
+.col-inv-equipo {
+    min-width: 180px;
+}
+
+.col-inv-estado {
+    min-width: 95px;
+}
+
+.col-inv-detalle {
+    min-width: 130px;
+}
+
+.col-inv-disponibilidad {
+    min-width: 110px;
+}
+
+.col-inv-ubicacion {
+    min-width: 125px;
+}
+
+.col-inv-usuario {
+    min-width: 130px;
+}
 
 /* Filas alternadas (Zebra) y celdas */
 .tabla-datos td {
@@ -296,7 +315,7 @@
     .tabla-header-area {
         flex-direction: row;
         justify-content: space-between;
-        align-items: flex-end;
+        align-items: center;
     }
 
     .tabla-acciones-header {

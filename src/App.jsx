@@ -8,7 +8,7 @@ import { PaginaInventario } from "./pages/PaginaInventario";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { RutaProtegida } from "./components/RutaProtegida";
 import { RutaPublica } from "./components/RutaPublica";
-import logoCalidda from "./IMG/logo.png";
+import logoCalidda from "./IMG/LogoCalidda.svg";
 import "./App.css";
 
 function AppContent() {
@@ -16,15 +16,17 @@ function AppContent() {
 
   return (
     <div className="app-container">
-      <header id="header" className="app-header">
-        <div className="header-content">
-          <img src={logoCalidda} alt="Logo Cálidda" className="header-logo" />
-          <h1 id="titulo" className="header-titulo">
-            CONTROL DE EQUIPOS <br /> CÁLIDDA
-          </h1>
-        </div>
-      </header>
-
+      {/* El header solo se muestra cuando NO hay sesión (pantalla de login) */}
+      {!loading && !user && (
+        <header id="header" className="app-header">
+          <div className="header-content">
+            <img src={logoCalidda} alt="Logo Cálidda" className="header-logo" />
+            <span id="titulo" className="header-titulo">
+              CONTROL DE EQUIPOS
+            </span>
+          </div>
+        </header>
+      )}
       {/* La barra de navegación sólo se muestra cuando el usuario está autenticado */}
       {!loading && user && <Navegacion />}
 

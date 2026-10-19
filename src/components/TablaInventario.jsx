@@ -59,7 +59,8 @@ export const TablaInventario = () => {
       const numeroSerie = equipo.numero_serie
         ? ` - NS ${equipo.numero_serie}`
         : "";
-      const equipoCompleto = `${equipo.tipo_equipo || ""} - ${equipo.marca || ""} ${equipo.modelo || ""}${numeroSerie}`.trim();
+      const equipoCompleto =
+        `${equipo.tipo_equipo || ""} - ${equipo.marca || ""} ${equipo.modelo || ""}${numeroSerie}`.trim();
       const estado = equipo.estado || "";
       const detalle = equipo.detalle_equipo || "";
       const estaDisponible = Boolean(equipo.disponibilidad);
@@ -167,11 +168,11 @@ export const TablaInventario = () => {
     }
 
     const filasParaExcel = datosOrdenadosYFiltrados.map((item) => ({
-      "Equipo": item.equipo,
-      "Estado": item.estado,
-      "Detalle": item.detalle,
-      "Disponibilidad": item.disponibilidad,
-      "Ubicación": item.ubicacion,
+      Equipo: item.equipo,
+      Estado: item.estado,
+      Detalle: item.detalle,
+      Disponibilidad: item.disponibilidad,
+      Ubicación: item.ubicacion,
       "Usuario actual": item.usuarioActual,
     }));
 
@@ -205,7 +206,10 @@ export const TablaInventario = () => {
       );
     }
     return (
-      <span className="sort-icon-active" aria-label={`Orden ${orden.direccion}`}>
+      <span
+        className="sort-icon-active"
+        aria-label={`Orden ${orden.direccion}`}
+      >
         {orden.direccion === "asc" ? "▲" : "▼"}
       </span>
     );
@@ -213,13 +217,15 @@ export const TablaInventario = () => {
 
   return (
     <section id="seccion-lista" className="seccion-tabla-inventario">
-      <div className="tabla-header-area">
+      <div className="tabla-header-area1">
         <div className="tabla-titulos-container">
           <h2 className="tabla-titulo">Inventario General</h2>
           <p className="tabla-subtitulo">
             {!cargando && (
               <span className="tabla-contador-registros">
-                {" "}• Mostrando {datosOrdenadosYFiltrados.length} de {equipos.length} equipos
+                {" "}
+                Mostrando {datosOrdenadosYFiltrados.length} de {equipos.length}{" "}
+                equipos
               </span>
             )}
           </p>
@@ -253,7 +259,7 @@ export const TablaInventario = () => {
             >
               <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16h-8v-2h8v2zm0-4h-8v-2h8v2zm-3-5V3.5L18.5 9H13z" />
             </svg>
-            <span>Exportar a Excel</span>
+            <span>Excel</span>
           </button>
         </div>
       </div>
@@ -334,7 +340,9 @@ export const TablaInventario = () => {
                     className="input-filtro-columna"
                     placeholder="Buscar..."
                     value={filtros.equipo}
-                    onChange={(e) => handleFiltroChange("equipo", e.target.value)}
+                    onChange={(e) =>
+                      handleFiltroChange("equipo", e.target.value)
+                    }
                     aria-label="Filtrar por Equipo"
                   />
                   {filtros.equipo && (
@@ -356,7 +364,9 @@ export const TablaInventario = () => {
                     className="input-filtro-columna"
                     placeholder="Buscar..."
                     value={filtros.estado}
-                    onChange={(e) => handleFiltroChange("estado", e.target.value)}
+                    onChange={(e) =>
+                      handleFiltroChange("estado", e.target.value)
+                    }
                     aria-label="Filtrar por Estado"
                   />
                   {filtros.estado && (
@@ -378,7 +388,9 @@ export const TablaInventario = () => {
                     className="input-filtro-columna"
                     placeholder="Buscar..."
                     value={filtros.detalle}
-                    onChange={(e) => handleFiltroChange("detalle", e.target.value)}
+                    onChange={(e) =>
+                      handleFiltroChange("detalle", e.target.value)
+                    }
                     aria-label="Filtrar por Detalle"
                   />
                   {filtros.detalle && (
@@ -489,7 +501,9 @@ export const TablaInventario = () => {
                   <td>
                     <strong>{item.raw.tipo_equipo}</strong> - {item.raw.marca}{" "}
                     {item.raw.modelo}
-                    {item.raw.numero_serie ? ` - NS ${item.raw.numero_serie}` : ""}
+                    {item.raw.numero_serie
+                      ? ` - NS ${item.raw.numero_serie}`
+                      : ""}
                   </td>
                   <td>{item.estado}</td>
                   <td>{item.detalle}</td>
