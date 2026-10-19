@@ -255,15 +255,6 @@ export const TablaMovimientos = () => {
   return (
     <section id="seccion-lista" className="seccion-tabla-movimientos">
       <div className="tabla-header-area">
-<<<<<<< HEAD
-        <div className="tabla-titulos-container">
-          <h2 className="tabla-titulo">Trazabilidad de equipos</h2>
-          <p className="tabla-subtitulo">
-            {!cargando && !error && (
-              <span className="tabla-contador-registros">
-                {" "}• Mostrando {datosOrdenadosYFiltrados.length} de {movimientos.length} registros
-              </span>
-=======
         <div className="tabla-header-top">
           <div className="tabla-titulos-container">
             <h2 className="tabla-titulo">Trazabilidad de equipos</h2>
@@ -284,7 +275,6 @@ export const TablaMovimientos = () => {
               >
                 Limpiar filtros de columna
               </button>
->>>>>>> b87f0f30dc0b7015e3dcc11504ddf1a4a1bca7ce
             )}
           </div>
 
