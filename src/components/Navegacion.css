@@ -37,10 +37,10 @@
 .nav-link {
     text-decoration: none;
     color: #ffffff;
-    font-size: 0.9rem;
+    font-size: 0.8rem;
     font-weight: 600;
     letter-spacing: 0.02em;
-    padding: 0.5rem 0.9rem;
+    padding: 0.5rem 0.5rem;
     min-height: 42px;
     display: inline-flex;
     align-items: center;
@@ -158,14 +158,17 @@
     }
 
     .nav-usuario-area {
-        width: 100%;
+        width: auto;
         justify-content: center;
-        margin-left: 0;
-        padding-top: 0.35rem;
-        border-top: 1px solid rgba(255, 255, 255, 0.2);
+        align-items: center;
     }
 
     .nav-user-name {
+        display: none;
         max-width: 110px;
+    }
+
+    .btn-cerrar-sesion span {
+        display: none;
     }
 }
