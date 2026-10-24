@@ -3,9 +3,12 @@ import * as XLSX from "xlsx";
 import { supabase } from "../supabase/supabaseClient";
 import "./TablaInventario.css";
 
+const BUCKET_FOTOS = "movimientos-fotos";
+
 export const TablaInventario = () => {
   const [equipos, setEquipos] = useState([]);
   const [cargando, setCargando] = useState(true);
+  const [imagenAmpliada, setImagenAmpliada] = useState(null);
 
   // Estados para filtros por columna
   const [filtros, setFiltros] = useState({
@@ -45,6 +48,7 @@ export const TablaInventario = () => {
               `
               id_equipo,
               persona ( nombre ),
+              foto_path,
               ubicaciones!id_ubicacion_destino ( disponibilidad, ubicacion )
             `,
             )
@@ -63,10 +67,38 @@ export const TablaInventario = () => {
           }
         }
 
+        const rutasFotos = [
+          ...new Set(
+            [...ultimoPorEquipo.values()]
+              .map((mov) => mov.foto_path)
+              .filter(Boolean),
+          ),
+        ];
+        const fotosFirmadas = await Promise.all(
+          rutasFotos.map(async (ruta) => {
+            const { data, error } = await supabase.storage
+              .from(BUCKET_FOTOS)
+              .createSignedUrl(ruta, 60 * 60);
+            if (error) {
+              console.error("Error al generar URL de foto:", error.message);
+            }
+            return [ruta, data?.signedUrl || null];
+          }),
+        );
+        const urlPorRuta = new Map(fotosFirmadas);
+
         setEquipos(
           (equiposRes.data ?? []).map((eq) => ({
             ...eq,
-            ultimoMovimiento: ultimoPorEquipo.get(eq.id_equipo) ?? null,
+            ultimoMovimiento: ultimoPorEquipo.has(eq.id_equipo)
+              ? {
+                  ...ultimoPorEquipo.get(eq.id_equipo),
+                  fotoUrl:
+                    urlPorRuta.get(
+                      ultimoPorEquipo.get(eq.id_equipo).foto_path,
+                    ) || null,
+                }
+              : null,
           })),
         );
       } catch (error) {
@@ -108,6 +140,7 @@ export const TablaInventario = () => {
 
       const ubicacion = ubic?.ubicacion || "Sin ubicación asignada";
       const usuarioActual = ultimo?.persona?.nombre || "Sin movimientos";
+      const fotoUrl = ultimo?.fotoUrl || null;
 
       return {
         id: equipo.id_equipo,
@@ -119,6 +152,7 @@ export const TablaInventario = () => {
         claseDisponibilidad,
         ubicacion,
         usuarioActual,
+        fotoUrl,
       };
     });
   }, [equipos]);
@@ -366,6 +400,7 @@ export const TablaInventario = () => {
                   {renderSortIcon("usuarioActual")}
                 </div>
               </th>
+              <th className="col-foto">Foto</th>
             </tr>
 
             {/* Fila 2: Inputs de búsqueda por columna */}
@@ -514,19 +549,20 @@ export const TablaInventario = () => {
                   )}
                 </div>
               </th>
+              <th aria-label="Sin filtro para fotos"></th>
             </tr>
           </thead>
 
           <tbody id="cuerpo-tabla-equipos">
             {cargando ? (
               <tr>
-                <td colSpan="6" className="tabla-mensaje-estado">
+                <td colSpan="7" className="tabla-mensaje-estado">
                   Cargando inventario...
                 </td>
               </tr>
             ) : datosOrdenadosYFiltrados.length === 0 ? (
               <tr>
-                <td colSpan="6" className="tabla-mensaje-estado">
+                <td colSpan="7" className="tabla-mensaje-estado">
                   {equipos.length === 0
                     ? "No hay equipos registrados."
                     : "No se encontraron equipos que coincidan con los filtros aplicados."}
@@ -553,12 +589,55 @@ export const TablaInventario = () => {
                   </td>
                   <td>{item.ubicacion}</td>
                   <td>{item.usuarioActual}</td>
+                  <td className="td-foto">
+                    {item.fotoUrl ? (
+                      <button
+                        type="button"
+                        className="tabla-foto-boton"
+                        onClick={() => setImagenAmpliada(item.fotoUrl)}
+                        aria-label="Ampliar foto del equipo"
+                      >
+                        <img
+                          src={item.fotoUrl}
+                          alt="Foto más reciente del equipo"
+                          className="tabla-foto-thumbnail"
+                          loading="lazy"
+                        />
+                      </button>
+                    ) : (
+                      <span className="tabla-sin-foto">—</span>
+                    )}
+                  </td>
                 </tr>
               ))
             )}
           </tbody>
         </table>
       </div>
+      {imagenAmpliada && (
+        <div
+          className="lightbox-overlay"
+          onClick={() => setImagenAmpliada(null)}
+          role="dialog"
+          aria-label="Imagen ampliada"
+        >
+          <div className="lightbox-content" onClick={(e) => e.stopPropagation()}>
+            <button
+              type="button"
+              className="lightbox-cerrar"
+              onClick={() => setImagenAmpliada(null)}
+              aria-label="Cerrar imagen"
+            >
+              ×
+            </button>
+            <img
+              src={imagenAmpliada}
+              alt="Foto más reciente del equipo ampliada"
+              className="lightbox-imagen"
+            />
+          </div>
+        </div>
+      )}
     </section>
   );
 };

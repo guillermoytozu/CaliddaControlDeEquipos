@@ -3,6 +3,8 @@ import * as XLSX from "xlsx";
 import { supabase } from "../supabase/supabaseClient";
 import "./TablaMovimientos.css";
 
+const BUCKET_FOTOS = "movimientos-fotos";
+
 export const TablaMovimientos = () => {
   // Obtenemos la fecha de hoy en formato YYYY-MM-DD
   const hoy = new Date().toISOString().split("T")[0];
@@ -30,6 +32,9 @@ export const TablaMovimientos = () => {
   // Estado para ordenamiento
   const [orden, setOrden] = useState({ columna: "fecha", direccion: "desc" });
 
+  // Estado para la imagen ampliada (lightbox)
+  const [imagenAmpliada, setImagenAmpliada] = useState(null);
+
   useEffect(() => {
     const cargarDatos = async () => {
       setCargando(true);
@@ -45,6 +50,7 @@ export const TablaMovimientos = () => {
               id_movimiento,
               tipo_movimiento,
               fecha_hora,
+              foto_path,
               persona ( nombre ),
               estado_historico,
               observaciones,
@@ -59,7 +65,26 @@ export const TablaMovimientos = () => {
 
         if (error) throw error;
 
-        setMovimientos(data || []);
+        const movimientosConFotos = await Promise.all(
+          (data || []).map(async (movimiento) => {
+            if (!movimiento.foto_path) return { ...movimiento, fotoUrl: null };
+
+            const { data: fotoFirmada, error: errorFoto } = await supabase.storage
+              .from(BUCKET_FOTOS)
+              .createSignedUrl(movimiento.foto_path, 60 * 60);
+
+            if (errorFoto) {
+              console.error("Error al generar URL de foto:", errorFoto.message);
+            }
+
+            return {
+              ...movimiento,
+              fotoUrl: fotoFirmada?.signedUrl || null,
+            };
+          }),
+        );
+
+        setMovimientos(movimientosConFotos);
         setError(false);
       } catch (err) {
         console.error("Error al cargar los datos de Supabase:", err.message);
@@ -103,6 +128,8 @@ export const TablaMovimientos = () => {
       const estado = dato.estado_historico || "";
       const observaciones = dato.observaciones || "";
       const movimiento = dato.tipo_movimiento || "";
+      const fotoPath = dato.foto_path || null;
+      const fotoUrl = dato.fotoUrl || null;
 
       return {
         id: dato.id_movimiento,
@@ -115,6 +142,8 @@ export const TablaMovimientos = () => {
         fecha,
         hora,
         timestamp,
+        fotoPath,
+        fotoUrl,
       };
     });
   }, [movimientos]);
@@ -216,6 +245,7 @@ export const TablaMovimientos = () => {
       Movimiento: item.movimiento,
       Fecha: item.fecha,
       Hora: item.hora,
+      Foto: item.fotoUrl || "Sin foto",
     }));
 
     const worksheet = XLSX.utils.json_to_sheet(filasParaExcel);
@@ -255,6 +285,8 @@ export const TablaMovimientos = () => {
       </span>
     );
   };
+
+  const totalColumnas = 9;
 
   return (
     <section id="seccion-lista" className="seccion-tabla-movimientos">
@@ -415,6 +447,11 @@ export const TablaMovimientos = () => {
                 <div className="th-content">
                   <span>Hora</span>
                   {renderSortIcon("hora")}
+                </div>
+              </th>
+              <th className="col-foto">
+                <div className="th-content">
+                  <span>Foto</span>
                 </div>
               </th>
             </tr>
@@ -611,13 +648,15 @@ export const TablaMovimientos = () => {
                   )}
                 </div>
               </th>
+              {/* Columna de foto: sin filtro */}
+              <th></th>
             </tr>
           </thead>
 
           <tbody id="cuerpo-tabla-equipos">
             {cargando && (
               <tr>
-                <td colSpan="8" className="tabla-mensaje-estado">
+                <td colSpan={totalColumnas} className="tabla-mensaje-estado">
                   Cargando movimientos...
                 </td>
               </tr>
@@ -625,7 +664,7 @@ export const TablaMovimientos = () => {
 
             {error && !cargando && (
               <tr>
-                <td colSpan="8" className="tabla-mensaje-error">
+                <td colSpan={totalColumnas} className="tabla-mensaje-error">
                   Error al cargar la lista.
                 </td>
               </tr>
@@ -633,7 +672,7 @@ export const TablaMovimientos = () => {
 
             {!cargando && !error && datosOrdenadosYFiltrados.length === 0 && (
               <tr>
-                <td colSpan="8" className="tabla-mensaje-estado">
+                <td colSpan={totalColumnas} className="tabla-mensaje-estado">
                   {movimientos.length === 0
                     ? "No se encontraron movimientos en este rango de fechas."
                     : "No se encontraron movimientos que coincidan con los filtros aplicados."}
@@ -665,12 +704,54 @@ export const TablaMovimientos = () => {
                     </td>
                     <td>{item.fecha}</td>
                     <td>{item.hora}</td>
+                    <td className="td-foto">
+                      {item.fotoUrl ? (
+                        <img
+                          src={item.fotoUrl}
+                          alt="Foto del movimiento"
+                          className="tabla-foto-thumbnail"
+                          loading="lazy"
+                          onClick={() => setImagenAmpliada(item.fotoUrl)}
+                        />
+                      ) : (
+                        <span className="tabla-sin-foto">—</span>
+                      )}
+                    </td>
                   </tr>
                 );
               })}
           </tbody>
         </table>
       </div>
+
+      {/* Lightbox: imagen ampliada */}
+      {imagenAmpliada && (
+        <div
+          className="lightbox-overlay"
+          onClick={() => setImagenAmpliada(null)}
+          role="dialog"
+          aria-label="Imagen ampliada"
+        >
+          <div
+            className="lightbox-content"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              type="button"
+              className="lightbox-cerrar"
+              onClick={() => setImagenAmpliada(null)}
+              aria-label="Cerrar imagen"
+            >
+              ✕
+            </button>
+            <img
+              src={imagenAmpliada}
+              alt="Foto del movimiento ampliada"
+              className="lightbox-imagen"
+            />
+          </div>
+        </div>
+      )}
     </section>
   );
 };

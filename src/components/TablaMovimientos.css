@@ -371,6 +371,78 @@
     color: #15803d;
 }
 
+/* Miniaturas y ampliación de fotos asociadas a movimientos */
+.col-foto,
+.td-foto {
+    min-width: 92px;
+    text-align: center;
+}
+
+.td-foto {
+    width: 100px;
+}
+
+.td-foto > .tabla-foto-thumbnail {
+    display: inline-block;
+    width: 64px;
+    height: 56px;
+    object-fit: cover;
+    border: 1px solid var(--color-gris-4);
+    border-radius: 8px;
+    box-shadow: var(--shadow-sm);
+    cursor: zoom-in;
+    transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.td-foto > .tabla-foto-thumbnail:hover {
+    transform: scale(1.06);
+    box-shadow: var(--shadow-md);
+}
+
+.tabla-sin-foto {
+    color: var(--color-texto-muted);
+}
+
+.lightbox-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    background: rgba(15, 23, 42, 0.82);
+}
+
+.lightbox-content {
+    position: relative;
+    max-width: min(92vw, 1000px);
+    max-height: 90vh;
+}
+
+.lightbox-imagen {
+    display: block;
+    max-width: 100%;
+    max-height: 85vh;
+    object-fit: contain;
+    border-radius: 8px;
+}
+
+.lightbox-cerrar {
+    position: absolute;
+    top: -0.8rem;
+    right: -0.8rem;
+    z-index: 1;
+    width: 2.25rem;
+    height: 2.25rem;
+    border: 0;
+    border-radius: 50%;
+    color: #fff;
+    background: #0f172a;
+    font-size: 1.4rem;
+    cursor: pointer;
+}
+
 /* Tablet y Desktop */
 @media (min-width: 768px) {
     .seccion-tabla-movimientos {

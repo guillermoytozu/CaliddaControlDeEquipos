@@ -36,7 +36,14 @@ const FotoInput = ({ id, foto, onChange, disabled }) => {
         capture="environment"
         onChange={onChange}
         disabled={disabled}
+        aria-label={foto ? "Cambiar foto del equipo" : "Seleccionar foto del equipo"}
       />
+      <label htmlFor={id} className={`foto-input-trigger ${disabled ? "deshabilitado" : ""}`}>
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M12 5v14M5 12h14" />
+        </svg>
+        {foto ? "Cambiar foto" : "Seleccionar foto"}
+      </label>
       {preview && (
         <div className="foto-input-preview">
           <img
