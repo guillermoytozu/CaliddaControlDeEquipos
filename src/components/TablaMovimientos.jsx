@@ -5,9 +5,19 @@ import "./TablaMovimientos.css";
 
 const BUCKET_FOTOS = "movimientos-fotos";
 
+const formatearFechaLocal = (fecha) => {
+  const pad = (valor) => String(valor).padStart(2, "0");
+  return `${fecha.getFullYear()}-${pad(fecha.getMonth() + 1)}-${pad(fecha.getDate())}`;
+};
+
+const crearFechaLocal = (valor) => {
+  const [anio, mes, dia] = valor.split("-").map(Number);
+  return new Date(anio, mes - 1, dia);
+};
+
 export const TablaMovimientos = () => {
-  // Obtenemos la fecha de hoy en formato YYYY-MM-DD
-  const hoy = new Date().toISOString().split("T")[0];
+  // El input date representa el calendario local, no el día UTC.
+  const hoy = formatearFechaLocal(new Date());
 
   const [movimientos, setMovimientos] = useState([]);
   const [cargando, setCargando] = useState(true);
@@ -39,9 +49,10 @@ export const TablaMovimientos = () => {
     const cargarDatos = async () => {
       setCargando(true);
       try {
-        // Ajustamos las horas para abarcar el día completo seleccionado
-        const inicioRango = `${fechaInicio} 00:00:00`;
-        const finRango = `${fechaFin} 23:59:59`;
+        // Convertimos los límites de cada día local a instantes UTC explícitos.
+        const inicioRango = crearFechaLocal(fechaInicio).toISOString();
+        const finExclusivo = crearFechaLocal(fechaFin);
+        finExclusivo.setDate(finExclusivo.getDate() + 1);
 
         const { data, error } = await supabase
           .from("movimientos")
@@ -60,7 +71,7 @@ export const TablaMovimientos = () => {
             `,
           )
           .gte("fecha_hora", inicioRango)
-          .lte("fecha_hora", finRango)
+          .lt("fecha_hora", finExclusivo.toISOString())
           .order("fecha_hora", { ascending: false });
 
         if (error) throw error;
