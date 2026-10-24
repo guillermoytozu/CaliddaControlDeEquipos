@@ -306,6 +306,11 @@
     color: #b91c1c;
 }
 
+.badge-disponibilidad.desconocida {
+    background-color: #e5e7eb;
+    color: #4b5563;
+}
+
 /* Tablet y Desktop */
 @media (min-width: 768px) {
     .seccion-tabla-inventario {

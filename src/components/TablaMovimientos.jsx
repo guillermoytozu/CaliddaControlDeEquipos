@@ -49,7 +49,8 @@ export const TablaMovimientos = () => {
               estado_historico,
               observaciones,
               inventarioequipos ( tipo_equipo, marca, modelo, numero_serie ),
-              ubicaciones ( ubicacion )
+              ubicacion_origen:ubicaciones!movimientos_id_ubicacion_origen_fkey ( ubicacion ),
+              ubicacion_destino:ubicaciones!movimientos_id_ubicacion_destino_fkey ( ubicacion )
             `,
           )
           .gte("fecha_hora", inicioRango)
@@ -92,7 +93,10 @@ export const TablaMovimientos = () => {
     return movimientos.map((dato) => {
       const { fecha, hora, timestamp } = parseFechaYHora(dato.fecha_hora);
       const usuario = dato.persona?.nombre || "Usuario desconocido";
-      const ubicacion = dato.ubicaciones?.ubicacion || "Ubicación desconocida";
+      const ubicacionOrigen = dato.ubicacion_origen?.ubicacion || "Sin origen";
+      const ubicacionDestino =
+        dato.ubicacion_destino?.ubicacion || "Sin destino";
+      const ubicacion = `${ubicacionOrigen} → ${ubicacionDestino}`;
       const equipo = dato.inventarioequipos
         ? `${dato.inventarioequipos.tipo_equipo}${dato.inventarioequipos.marca ? ` - ${dato.inventarioequipos.marca}` : ""}${dato.inventarioequipos.modelo ? ` ${dato.inventarioequipos.modelo}` : ""}${dato.inventarioequipos.numero_serie ? ` - NS ${dato.inventarioequipos.numero_serie}` : ""}`
         : "Equipo no encontrado";
@@ -349,7 +353,7 @@ export const TablaMovimientos = () => {
                 title="Clic para ordenar por Ubicación"
               >
                 <div className="th-content">
-                  <span>Ubicación</span>
+                  <span>Movimiento</span>
                   {renderSortIcon("ubicacion")}
                 </div>
               </th>
@@ -389,7 +393,7 @@ export const TablaMovimientos = () => {
                 title="Clic para ordenar por Movimiento"
               >
                 <div className="th-content">
-                  <span>Movimiento</span>
+                  <span>Tipo de Movimiento</span>
                   {renderSortIcon("movimiento")}
                 </div>
               </th>

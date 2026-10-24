@@ -6,6 +6,27 @@ import { useAuth } from "../context/AuthContext";
 import { supabase } from "../supabase/supabaseClient";
 import "./Formulario.css";
 
+const BUCKET_FOTOS = "movimientos-fotos";
+const MAX_FOTO_MB = 5;
+
+// Estructura base de un equipo en el formulario (incluye la foto adjunta)
+const EQUIPO_VACIO = {
+  id_equipo: "",
+  estado: "operativo",
+  observaciones: "",
+  foto: null,
+};
+
+// Devuelve un mensaje de error si la foto no es válida, o null si está bien
+const validarFoto = (file) => {
+  if (!file) return null;
+  if (!file.type.startsWith("image/")) return "El archivo debe ser una imagen.";
+  if (file.size > MAX_FOTO_MB * 1024 * 1024) {
+    return `La imagen no puede superar ${MAX_FOTO_MB} MB.`;
+  }
+  return null;
+};
+
 export const Formulario = () => {
   const { user } = useAuth();
 
@@ -14,15 +35,12 @@ export const Formulario = () => {
 
   const [data, setData] = useState({
     id_ubicacion: "",
+    id_ubicacion_destino: "",
     tipo_movimiento: "",
   });
 
   // Estado del selector principal de equipo
-  const [equipoInput, setEquipoInput] = useState({
-    id_equipo: "",
-    estado: "operativo",
-    observaciones: "",
-  });
+  const [equipoInput, setEquipoInput] = useState(EQUIPO_VACIO);
 
   // Lista de equipos adicionales que se muestran debajo
   const [equiposAgregados, setEquiposAgregados] = useState([]);
@@ -48,20 +66,46 @@ export const Formulario = () => {
     fetchData();
   }, []);
 
+  // Un equipo está disponible si su ubicación actual está marcada como disponible
+  const estaDisponible = (eq) => {
+    const ub = ubicaciones.find(
+      (u) => String(u.id_ubicacion) === String(eq.id_ubicacion),
+    );
+    return ub?.disponibilidad === true;
+  };
+
+  // Verificar si el usuario tiene equipos asignados (para habilitar el Ingreso)
+  const usuarioTieneEquiposAsignados =
+    user &&
+    equipos.some(
+      (eq) =>
+        !estaDisponible(eq) &&
+        Boolean(eq.id_persona) &&
+        String(eq.id_persona) === String(user.id),
+    );
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     let newData = { ...data, [name]: value };
 
-    // 1. Si el usuario cambia el tipo de movimiento, limpiamos ubicación y equipos
+    // 1. Si el usuario cambia el tipo de movimiento, limpiamos ubicaciones y equipos
     if (name === "tipo_movimiento") {
       newData.id_ubicacion = "";
-      setEquipoInput({ id_equipo: "", estado: "operativo", observaciones: "" });
+      newData.id_ubicacion_destino = "";
+      setEquipoInput(EQUIPO_VACIO);
       setEquiposAgregados([]);
     }
 
-    // 2. Si el usuario cambia la ubicación, limpiamos los equipos
+    // 2. Si el usuario cambia la ubicación de origen, limpiamos los equipos y ubicación de destino
     if (name === "id_ubicacion") {
-      setEquipoInput({ id_equipo: "", estado: "operativo", observaciones: "" });
+      newData.id_ubicacion_destino = "";
+      setEquipoInput(EQUIPO_VACIO);
+      setEquiposAgregados([]);
+    }
+
+    // 3. Si el usuario cambia la ubicación de destino, limpiamos los equipos
+    if (name === "id_ubicacion_destino") {
+      setEquipoInput(EQUIPO_VACIO);
       setEquiposAgregados([]);
     }
 
@@ -72,14 +116,7 @@ export const Formulario = () => {
   const handleAgregarEquipoVacio = () => {
     if (!puedeAgregarAdicional) return;
 
-    setEquiposAgregados((prev) => [
-      ...prev,
-      {
-        id_equipo: "",
-        estado: "operativo",
-        observaciones: "",
-      },
-    ]);
+    setEquiposAgregados((prev) => [...prev, { ...EQUIPO_VACIO }]);
   };
 
   // Permite eliminar un equipo adicional de la lista
@@ -89,6 +126,7 @@ export const Formulario = () => {
     );
   };
 
+  // Al eliminar el principal, el primer adicional (con su foto) pasa a ser el principal
   const handleEliminarPrincipal = () => {
     if (equiposAgregados.length > 0) {
       const [primero, ...resto] = equiposAgregados;
@@ -97,7 +135,7 @@ export const Formulario = () => {
     }
   };
 
-  // Permite editar un equipo adicional (equipo, estado u observaciones)
+  // Permite editar un equipo adicional (equipo, estado, observaciones o foto)
   const handleAgregadoChange = (index, campo, valor) => {
     setEquiposAgregados((prev) => {
       const copia = [...prev];
@@ -106,13 +144,30 @@ export const Formulario = () => {
     });
   };
 
+  // Maneja el archivo elegido en el input de foto (también recibe files: [] al quitar)
+  const obtenerFotoDelEvento = (e) => {
+    const file = e.target.files?.[0] ?? null;
+    const error = validarFoto(file);
+    if (error) {
+      alert(error);
+      return undefined; // undefined = no cambiar nada
+    }
+    return file;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!user)
       return alert("Debes iniciar sesión para registrar un movimiento.");
-    if (!data.tipo_movimiento || !data.id_ubicacion) {
-      return alert("Faltan datos obligatorios (Movimiento y Ubicación).");
+    if (!data.tipo_movimiento) {
+      return alert("Debes seleccionar el tipo de movimiento.");
+    }
+    if (data.tipo_movimiento === "Salida" && !data.id_ubicacion) {
+      return alert("Debes seleccionar una ubicación de origen.");
+    }
+    if (!data.id_ubicacion_destino) {
+      return alert("Debes seleccionar una ubicación de destino.");
     }
 
     // Equipos a registrar: el principal + los adicionales que tengan equipo elegido
@@ -155,18 +210,14 @@ export const Formulario = () => {
         );
       }
 
-      if (
-        equipoActual.disponibilidad === false &&
-        data.tipo_movimiento === "Salida"
-      ) {
+      const disponible = estaDisponible(equipoActual);
+
+      if (!disponible && data.tipo_movimiento === "Salida") {
         return alert(
           `Error crítico: El equipo "${equipoActual.tipo_equipo} ${equipoActual.marca}" ya no está disponible.`,
         );
       }
-      if (
-        equipoActual.disponibilidad === true &&
-        data.tipo_movimiento === "Ingreso"
-      ) {
+      if (disponible && data.tipo_movimiento === "Ingreso") {
         return alert(
           `Error crítico: El equipo "${equipoActual.tipo_equipo} ${equipoActual.marca}" ya figura como disponible.`,
         );
@@ -179,6 +230,11 @@ export const Formulario = () => {
           `Error crítico: No puedes ingresar el equipo "${equipoActual.tipo_equipo} ${equipoActual.marca}" porque no te pertenece.`,
         );
       }
+
+      // Si quieres que la foto sea obligatoria, descomenta:
+      // if (!item.foto) {
+      //   return alert(`Debes adjuntar una foto del equipo "${equipoActual.tipo_equipo} ${equipoActual.marca}".`);
+      // }
     }
 
     // 3. Confirmación tras pasar todas las validaciones
@@ -192,21 +248,46 @@ export const Formulario = () => {
 
     const esIngreso = data.tipo_movimiento === "Ingreso";
 
+    // Rutas de fotos subidas (para limpiar si el movimiento no llega a guardarse)
+    const rutasSubidas = [];
+    let movimientosInsertados = false;
+
     try {
+      // 0. Subida de fotos a Supabase Storage (una por equipo, si la hay)
+      const rutasFotos = await Promise.all(
+        equiposParaRegistrar.map(async (item) => {
+          if (!item.foto) return null;
+          const ext = item.foto.name.split(".").pop()?.toLowerCase() || "jpg";
+          const ruta = `${user.id}/${Date.now()}_${item.id_equipo}.${ext}`;
+          const { error } = await supabase.storage
+            .from(BUCKET_FOTOS)
+            .upload(ruta, item.foto, {
+              contentType: item.foto.type,
+              upsert: false,
+            });
+          if (error) throw error;
+          rutasSubidas.push(ruta);
+          return ruta;
+        }),
+      );
+
       // 1. Inserción de movimientos para cada equipo
-      const movimientosAInsertar = equiposParaRegistrar.map((item) => {
+      // id_ubicacion_origen = ubicación que tenía el equipo; id_ubicacion_destino = ubicación elegida
+      const movimientosAInsertar = equiposParaRegistrar.map((item, idx) => {
         const equipoActual = equipos.find(
           (eq) => eq.id_equipo.toString() === item.id_equipo.toString(),
         );
         return {
           id_persona: user.id,
           id_equipo: parseInt(item.id_equipo),
-          id_ubicacion: parseInt(data.id_ubicacion),
+          id_ubicacion_origen: equipoActual?.id_ubicacion ?? null,
+          id_ubicacion_destino: parseInt(data.id_ubicacion_destino),
           tipo_movimiento: data.tipo_movimiento,
           observaciones: item.observaciones ? item.observaciones.trim() : "",
           estado_historico: esIngreso
             ? item.estado || equipoActual?.estado || "operativo"
             : equipoActual?.estado || null,
+          foto_path: rutasFotos[idx],
         };
       });
 
@@ -215,17 +296,20 @@ export const Formulario = () => {
         .insert(movimientosAInsertar);
 
       if (errorInsert) throw errorInsert;
+      movimientosInsertados = true;
 
       // 2. Actualización de inventarioequipos para todos los equipos seleccionados
+      // La ubicación del equipo se actualiza siempre con la ubicación de destino
+      const idUbicacionDestino = parseInt(data.id_ubicacion_destino);
+
       if (esIngreso) {
-        // En Ingreso: actualizamos disponibilidad a true, liberamos usuario (null) y actualizamos estado
+        // En Ingreso: liberamos usuario (null), actualizamos estado y ubicación de destino
         const promesasUpdate = equiposParaRegistrar.map((item) => {
           const estadoFinal = item.estado || "operativo";
           return supabase
             .from("inventarioequipos")
             .update({
-              disponibilidad: true,
-              id_ubicacion: parseInt(data.id_ubicacion),
+              id_ubicacion: idUbicacionDestino,
               id_persona: null,
               estado: estadoFinal,
             })
@@ -245,8 +329,7 @@ export const Formulario = () => {
             if (reg) {
               return {
                 ...eq,
-                disponibilidad: true,
-                id_ubicacion: parseInt(data.id_ubicacion),
+                id_ubicacion: idUbicacionDestino,
                 id_persona: null,
                 estado: reg.estado || eq.estado || "operativo",
               };
@@ -255,15 +338,14 @@ export const Formulario = () => {
           }),
         );
       } else {
-        // En Salida: actualizamos disponibilidad a false y asignamos a usuario
+        // En Salida: asignamos el equipo al usuario y a la ubicación de destino
         const idsEquiposInt = equiposParaRegistrar.map((item) =>
           parseInt(item.id_equipo),
         );
         const { error: errorUpdate } = await supabase
           .from("inventarioequipos")
           .update({
-            disponibilidad: false,
-            id_ubicacion: parseInt(data.id_ubicacion),
+            id_ubicacion: idUbicacionDestino,
             id_persona: user.id,
           })
           .in("id_equipo", idsEquiposInt);
@@ -276,8 +358,7 @@ export const Formulario = () => {
             idsEquiposInt.includes(eq.id_equipo)
               ? {
                   ...eq,
-                  disponibilidad: false,
-                  id_ubicacion: parseInt(data.id_ubicacion),
+                  id_ubicacion: idUbicacionDestino,
                   id_persona: user.id,
                 }
               : eq,
@@ -288,33 +369,54 @@ export const Formulario = () => {
       alert(
         `${cantidad} ${cantidad === 1 ? "movimiento registrado" : "movimientos registrados"} con éxito.`,
       );
-      setData({ tipo_movimiento: "", id_ubicacion: "" });
-      setEquipoInput({ id_equipo: "", estado: "operativo", observaciones: "" });
+      setData({
+        tipo_movimiento: "",
+        id_ubicacion: "",
+        id_ubicacion_destino: "",
+      });
+      setEquipoInput(EQUIPO_VACIO);
       setEquiposAgregados([]);
     } catch (error) {
       console.error("Error en la base de datos:", error);
+      // Si el movimiento no se guardó, borramos las fotos que alcanzaron a subirse
+      if (!movimientosInsertados && rutasSubidas.length > 0) {
+        await supabase.storage.from(BUCKET_FOTOS).remove(rutasSubidas);
+      }
       alert("Hubo un error al procesar el movimiento.");
     }
   };
 
-  // Opciones de ubicación dinámicas
-  const opcionesUbicacionDinamicas = ubicaciones.map((ub) => ({
-    value: ub.id_ubicacion,
-    label: ub.ubicacion,
-  }));
+  // Origen (solo Salida): ubicaciones donde hay equipos disponibles
+  const opcionesUbicacionDinamicas = ubicaciones
+    .filter((ub) => ub.disponibilidad === true)
+    .map((ub) => ({ value: ub.id_ubicacion, label: ub.ubicacion }));
+
+  // Destino: Salida -> ubicaciones NO disponibles; Ingreso -> ubicaciones disponibles
+  const opcionesUbicacionDestino = ubicaciones
+    .filter((ub) =>
+      data.tipo_movimiento === "Salida"
+        ? ub.disponibilidad === false
+        : ub.disponibilidad === true,
+    )
+    .map((ub) => ({ value: ub.id_ubicacion, label: ub.ubicacion }));
 
   // Lógica de filtrado de equipos: la ubicación desbloquea y filtra los equipos
   let equiposFiltrados = [];
+
   if (data.tipo_movimiento === "Salida" && data.id_ubicacion) {
     equiposFiltrados = equipos.filter(
       (eq) =>
-        eq.disponibilidad === true &&
-        eq.id_ubicacion?.toString() === data.id_ubicacion.toString(),
+        estaDisponible(eq) &&
+        String(eq.id_ubicacion) === String(data.id_ubicacion),
     );
-  } else if (data.tipo_movimiento === "Ingreso" && data.id_ubicacion && user) {
+  } else if (
+    data.tipo_movimiento === "Ingreso" &&
+    data.id_ubicacion_destino &&
+    user
+  ) {
     equiposFiltrados = equipos.filter(
       (eq) =>
-        eq.disponibilidad === false &&
+        !estaDisponible(eq) &&
         Boolean(eq.id_persona) &&
         String(eq.id_persona) === String(user.id),
     );
@@ -357,16 +459,20 @@ export const Formulario = () => {
   // Determinar si el movimiento actual es Ingreso
   const esIngreso = data.tipo_movimiento === "Ingreso";
 
+  // Ingreso sin equipos asignados al usuario: no hay nada que ingresar
+  const sinEquiposParaIngreso = esIngreso && !usuarioTieneEquiposAsignados;
+
   // Opciones para el selector de estado
   const opcionesEstado = estadosEnum.map((est) => ({
     value: est,
     label: est.charAt(0).toUpperCase() + est.slice(1),
   }));
 
-  // Bloqueo general de equipos si no se ha completado movimiento o ubicación
+  // Bloqueo general de equipos si no se ha completado movimiento, ubicación de origen o destino
   const equiposBloqueado =
     !data.tipo_movimiento ||
-    !data.id_ubicacion ||
+    (data.tipo_movimiento === "Salida" && !data.id_ubicacion) ||
+    !data.id_ubicacion_destino ||
     equiposFiltrados.length === 0;
 
   // Validación para el botón "+" que agrega un nuevo div adicional
@@ -391,7 +497,7 @@ export const Formulario = () => {
 
   let tooltipBotonAgregar = "Agregar otro equipo";
   if (equiposBloqueado) {
-    tooltipBotonAgregar = "Seleccione movimiento y ubicación primero";
+    tooltipBotonAgregar = "Seleccione movimiento y ubicaciones primero";
   } else if (!principalTieneEquipo) {
     tooltipBotonAgregar = "Selecciona el equipo principal primero";
   } else if (!ultimoTieneEquipo) {
@@ -400,15 +506,24 @@ export const Formulario = () => {
     tooltipBotonAgregar = "Todos los equipos disponibles ya han sido agregados";
   }
 
+  // Placeholder dinámico del selector de equipo principal
   let placeholderPrimerComponente = "Seleccione equipo...";
   if (equiposBloqueado) {
-    placeholderPrimerComponente = !data.tipo_movimiento
-      ? "Seleccione movimiento primero..."
-      : !data.id_ubicacion
-        ? "Seleccione ubicación primero..."
-        : data.tipo_movimiento === "Salida"
-          ? "No hay equipos disponibles en esta ubicación"
-          : "No tienes equipos asignados para ingresar";
+    if (!data.tipo_movimiento) {
+      placeholderPrimerComponente = "Seleccione movimiento primero...";
+    } else if (sinEquiposParaIngreso) {
+      placeholderPrimerComponente = "No tienes equipos asignados para ingresar";
+    } else if (data.tipo_movimiento === "Salida" && !data.id_ubicacion) {
+      placeholderPrimerComponente = "Seleccione ubicación de origen primero...";
+    } else if (!data.id_ubicacion_destino) {
+      placeholderPrimerComponente =
+        "Seleccione ubicación de destino primero...";
+    } else if (data.tipo_movimiento === "Salida") {
+      placeholderPrimerComponente =
+        "No hay equipos disponibles en esta ubicación";
+    } else {
+      placeholderPrimerComponente = "No tienes equipos asignados para ingresar";
+    }
   }
 
   return (
@@ -436,22 +551,43 @@ export const Formulario = () => {
           onChange={handleChange}
           opciones={["Ingreso", "Salida"]}
         >
-          Movimiento:
+          Tipo de Movimiento:
         </RadioButton>
 
+        {data.tipo_movimiento === "Salida" && (
+          <SelectInput
+            name="id_ubicacion"
+            value={data.id_ubicacion}
+            onChange={handleChange}
+            opciones={opcionesUbicacionDinamicas}
+            disabled={!data.tipo_movimiento}
+            placeholder="Seleccione ubicación de origen..."
+          >
+            Ubicación de Origen:
+          </SelectInput>
+        )}
+
         <SelectInput
-          name="id_ubicacion"
-          value={data.id_ubicacion}
+          name="id_ubicacion_destino"
+          value={data.id_ubicacion_destino}
           onChange={handleChange}
-          opciones={opcionesUbicacionDinamicas}
-          disabled={!data.tipo_movimiento}
+          opciones={opcionesUbicacionDestino}
+          disabled={
+            !data.tipo_movimiento ||
+            sinEquiposParaIngreso ||
+            (data.tipo_movimiento === "Salida" && !data.id_ubicacion)
+          }
           placeholder={
             !data.tipo_movimiento
               ? "Seleccione movimiento primero..."
-              : "Seleccione ubicación..."
+              : sinEquiposParaIngreso
+                ? "No tienes equipos asignados para ingresar"
+                : data.tipo_movimiento === "Salida" && !data.id_ubicacion
+                  ? "Seleccione ubicación de origen primero..."
+                  : "Seleccione ubicación de destino..."
           }
         >
-          Ubicación:
+          Ubicación de Destino:
         </SelectInput>
 
         {/* Selector principal de equipo: permanece en su posición, sin botón "+" */}
@@ -489,6 +625,14 @@ export const Formulario = () => {
             }))
           }
           placeholderObservaciones="Observaciones de este equipo (Opcional)"
+          mostrarFoto={true}
+          labelFoto="Foto (Opcional):"
+          foto={equipoInput.foto}
+          onFotoChange={(e) => {
+            const file = obtenerFotoDelEvento(e);
+            if (file === undefined) return;
+            setEquipoInput((prev) => ({ ...prev, foto: file }));
+          }}
           mostrarBotonAgregar={false}
           mostrarBotonEliminar={equiposAgregados.length > 0}
           onEliminar={handleEliminarPrincipal}
@@ -532,6 +676,14 @@ export const Formulario = () => {
                     handleAgregadoChange(index, "observaciones", e.target.value)
                   }
                   placeholderObservaciones="Observaciones de este equipo (Opcional)"
+                  mostrarFoto={true}
+                  labelFoto={`Foto (Equipo #${index + 2}):`}
+                  foto={item.foto}
+                  onFotoChange={(e) => {
+                    const file = obtenerFotoDelEvento(e);
+                    if (file === undefined) return;
+                    handleAgregadoChange(index, "foto", file);
+                  }}
                   mostrarBotonAgregar={false}
                   mostrarBotonEliminar={true}
                   onEliminar={() => handleEliminarEquipo(index)}

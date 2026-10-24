@@ -23,10 +23,11 @@ export const TablaInventario = () => {
   useEffect(() => {
     const obtenerInventario = async () => {
       try {
-        const { data, error } = await supabase
-          .from("inventarioequipos")
-          .select(
-            `
+        const [equiposRes, movimientosRes] = await Promise.all([
+          supabase
+            .from("inventarioequipos")
+            .select(
+              `
               id_equipo,
               tipo_equipo,
               marca,
@@ -34,16 +35,40 @@ export const TablaInventario = () => {
               numero_serie,
               estado,
               detalle_equipo,
-              disponibilidad,
-              ubicaciones ( ubicacion ),
-              persona ( nombre )
+              ubicaciones ( disponibilidad, ubicacion )
             `,
-          )
-          .order("id_equipo", { ascending: true });
+            )
+            .order("id_equipo", { ascending: true }),
+          supabase
+            .from("movimientos")
+            .select(
+              `
+              id_equipo,
+              persona ( nombre ),
+              ubicaciones!id_ubicacion_destino ( disponibilidad, ubicacion )
+            `,
+            )
+            .order("fecha_hora", { ascending: false }),
+        ]);
 
-        if (error) throw error;
+        if (equiposRes.error) throw equiposRes.error;
+        if (movimientosRes.error) throw movimientosRes.error;
 
-        if (data) setEquipos(data);
+        // Como viene ordenado de más reciente a más antiguo,
+        // el primero que aparece por equipo es su último movimiento
+        const ultimoPorEquipo = new Map();
+        for (const mov of movimientosRes.data ?? []) {
+          if (!ultimoPorEquipo.has(mov.id_equipo)) {
+            ultimoPorEquipo.set(mov.id_equipo, mov);
+          }
+        }
+
+        setEquipos(
+          (equiposRes.data ?? []).map((eq) => ({
+            ...eq,
+            ultimoMovimiento: ultimoPorEquipo.get(eq.id_equipo) ?? null,
+          })),
+        );
       } catch (error) {
         console.error("Error al obtener los equipos:", error.message);
       } finally {
@@ -63,14 +88,26 @@ export const TablaInventario = () => {
         `${equipo.tipo_equipo || ""} - ${equipo.marca || ""} ${equipo.modelo || ""}${numeroSerie}`.trim();
       const estado = equipo.estado || "";
       const detalle = equipo.detalle_equipo || "";
-      const estaDisponible = Boolean(equipo.disponibilidad);
-      const disponibilidad = estaDisponible ? "Disponible" : "En uso";
-      const ubicacion = estaDisponible
-        ? equipo.ubicaciones?.ubicacion || "Sin ubicación asignada"
-        : "-";
-      const usuarioActual = !estaDisponible
-        ? equipo.persona?.nombre || "Usuario desconocido"
-        : "-";
+
+      const ultimo = equipo.ultimoMovimiento;
+      // Si el equipo no tiene movimientos, usa la ubicación registrada en el inventario
+      const ubic = ultimo?.ubicaciones ?? equipo.ubicaciones ?? null;
+
+      let disponibilidad;
+      let claseDisponibilidad;
+      if (ubic?.disponibilidad === true) {
+        disponibilidad = "Disponible";
+        claseDisponibilidad = "disponible";
+      } else if (ubic?.disponibilidad === false) {
+        disponibilidad = "No disponible";
+        claseDisponibilidad = "en-uso";
+      } else {
+        disponibilidad = "Disponibilidad desconocida";
+        claseDisponibilidad = "desconocida";
+      }
+
+      const ubicacion = ubic?.ubicacion || "Sin ubicación asignada";
+      const usuarioActual = ultimo?.persona?.nombre || "Sin movimientos";
 
       return {
         id: equipo.id_equipo,
@@ -79,7 +116,7 @@ export const TablaInventario = () => {
         estado,
         detalle,
         disponibilidad,
-        estaDisponible,
+        claseDisponibilidad,
         ubicacion,
         usuarioActual,
       };
@@ -315,7 +352,7 @@ export const TablaInventario = () => {
                 title="Clic para ordenar por Ubicación"
               >
                 <div className="th-content">
-                  <span>Ubicación</span>
+                  <span>Última Ubicación</span>
                   {renderSortIcon("ubicacion")}
                 </div>
               </th>
@@ -325,7 +362,7 @@ export const TablaInventario = () => {
                 title="Clic para ordenar por Usuario actual"
               >
                 <div className="th-content">
-                  <span>Usuario actual</span>
+                  <span>Último Usuario</span>
                   {renderSortIcon("usuarioActual")}
                 </div>
               </th>
@@ -509,7 +546,7 @@ export const TablaInventario = () => {
                   <td>{item.detalle}</td>
                   <td>
                     <span
-                      className={`badge-disponibilidad ${item.estaDisponible ? "disponible" : "en-uso"}`}
+                      className={`badge-disponibilidad ${item.claseDisponibilidad}`}
                     >
                       {item.disponibilidad}
                     </span>
