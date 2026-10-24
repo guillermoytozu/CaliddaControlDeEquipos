@@ -33,7 +33,6 @@ const FotoInput = ({ id, foto, onChange, disabled }) => {
         id={id}
         className="foto-input-field"
         accept="image/*"
-        capture="environment"
         onChange={onChange}
         disabled={disabled}
         aria-label={foto ? "Cambiar foto del equipo" : "Seleccionar foto del equipo"}
